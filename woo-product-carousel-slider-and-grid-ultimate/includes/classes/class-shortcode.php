@@ -192,9 +192,15 @@ class WCPCSU_Shortcode {
 
 		$header_title     			= ! empty( $header_title ) ? $header_title : '';
 
+		$allowed_layouts 			= array( 'carousel', 'grid' );
+		$allowed_themes  			= array( 'theme_1', 'theme_2', 'theme_3' );
+
 		// shortcode attribute
         $layout                     = ! empty( $atts['layout'] ) ? $atts['layout'] : $layout;
+		$layout 					= in_array( $layout, $allowed_layouts, true ) ? $layout : 'carousel';
+		
         $theme                      = ! empty( $atts['theme'] ) ? $atts['theme'] : $theme;
+		$theme 						= in_array( $theme, $allowed_themes, true ) ? $theme : 'theme_1';
         $total_products             = ! empty( $atts['total_products'] ) ? $atts['total_products'] : $total_products;
         $h_title_show               = ! empty( $atts['h_title_show'] ) ? $atts['h_title_show'] : $h_title_show;
         $header_title               = ! empty( $atts['header_title'] ) ? $atts['header_title'] : $header_title;
