@@ -16,6 +16,24 @@ class WCPCSU_Meta_Box {
 			add_action( 'add_meta_boxes_' . WCPCSU_CUSTOM_POST_TYPE, array( $this, 'register_meta_box' ) );
 			add_action( 'edit_post', array( $this, 'update_meta_data' ) );
 		}
+		add_filter( 'wp_insert_post_data', array( $this, 'insert_post_data' ), 10, 2 );
+		add_filter( 'post_row_actions', array( $this, 'post_row_actions' ), 10, 2 );
+	}
+
+	public function post_row_actions( $actions, $post ) {
+		// Check if the post type is your custom post type
+		if ( 'wcpcsu-custom-post' === get_post_type( $post ) ) {
+			// Remove the 'View' action
+			unset( $actions['view'] );
+		}
+		return $actions;
+	}
+
+	public function insert_post_data( $data, $postarr ) {
+		if ( 'wcpcsu-custom-post' === $data['post_type'] ) {
+			$data['post_title'] = sanitize_text_field( $data['post_title'] );
+		}
+		return $data;
 	}
 
 	public function register_meta_box() {

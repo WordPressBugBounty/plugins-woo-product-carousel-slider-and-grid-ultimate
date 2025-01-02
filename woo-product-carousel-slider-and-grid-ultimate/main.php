@@ -3,7 +3,7 @@
 Plugin Name: Product Carousel Slider & Grid Ultimate for WooCommerce
 Plugin URI:  https://wpwax.com/product/woocommerce-product-carousel-slider-grid-ultimate-pro
 Description: It is a fully responsive and mobile friendly WooCommerce Product Carousel, Slider and Grid plugin which comes with lots of features.
-Version:     1.10.0
+Version:     1.10.1
 Author:      wpWax
 Author URI:  https://wpwax.com
 License:     GPL2
@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Domain Path: /languages/
 Text Domain: woo-product-carousel-slider-and-grid-ultimate
 WC requires at least: 3.0
-WC tested up to: 8.8
+WC tested up to: 9.5.1
  */
 defined('ABSPATH') || die('Direct access is not allow');
 
@@ -69,7 +69,7 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
                     add_action( 'admin_notices', array(self::$instance, 'WCPCSU_admin_notice') );
                 }
                 self::$instance->adl_constants();
-                add_action('plugin_loaded',array( self::$instance,'wcpcsu_load_textdomain' ) );
+                add_action('init',array( self::$instance,'wcpcsu_load_textdomain' ) );
                 add_action('admin_enqueue_scripts',array(self::$instance, 'wcpcsu_enqueue_file'));
                 add_action('template_redirect',array(self::$instance, 'template_enqueue_file'));
                 add_action('admin_menu',array(self::$instance,'upgrade_to_pro'));
@@ -185,6 +185,11 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
          */
         public function wcpcsu_load_textdomain()
         {
+            // Determine the current locale
+            $locale = determine_locale();
+            // Allow filters to modify the locale
+            $locale = apply_filters( 'plugin_locale', $locale, 'woocommerce-product-carousel-slider-and-grid-ultimate' );
+            load_textdomain( 'woocommerce-product-carousel-slider-and-grid-ultimate', WP_LANG_DIR . '/plugins/woocommerce-product-carousel-slider-and-grid-ultimate-' . $locale . '.mo' );
             load_plugin_textdomain( 'woocommerce-product-carousel-slider-and-grid-ultimate', false, WCPCSU_LANG_DIR );
         }
 
