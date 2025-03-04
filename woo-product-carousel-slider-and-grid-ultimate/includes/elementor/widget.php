@@ -543,7 +543,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'header_title_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-products__header h2',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -628,7 +628,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'header_hover_title_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-products__header h2:hover',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -729,7 +729,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'title_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-product__title a',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -813,7 +813,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'title_hover_title_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-product__title:hover',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -922,7 +922,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'price_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-product__price__sale .amount',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'      => Controls_Manager::SLIDER,
@@ -1044,7 +1044,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'price_hover_title_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-product__price__sale .amount:hover',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'      => Controls_Manager::SLIDER,
@@ -1214,7 +1214,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'cart_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-button .button',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -1331,7 +1331,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'cart_hover_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-button .button:hover',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -1560,7 +1560,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'badge_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-badge',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -2175,7 +2175,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'     	=> 'grid_pagi_typography',
 				'type'		=> Group_Control_Typography::get_type(),
 				'selector' 	=> '{{WRAPPER}} .wpcu-pagination .page-numbers',
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -2303,7 +2303,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 					'{{WRAPPER}} .wpcu-pagination .page-numbers:hover',
 					'{{WRAPPER}} .wpcu-pagination .nav-links .current',
 				],
-				'scheme' => Typography::TYPOGRAPHY_3,
+				//'scheme' => Typography::TYPOGRAPHY_3,
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
