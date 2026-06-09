@@ -3,7 +3,7 @@
 Plugin Name: Product Carousel Slider & Grid Ultimate for WooCommerce
 Plugin URI:  https://wpwax.com/product/woocommerce-product-carousel-slider-grid-ultimate-pro
 Description: It is a fully responsive and mobile friendly WooCommerce Product Carousel, Slider and Grid plugin which comes with lots of features.
-Version:     1.10.2
+Version:     1.11.0
 Author:      wpWax
 Author URI:  https://wpwax.com
 License:     GPL2
@@ -22,7 +22,7 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
      *
      * @since 1.0.0
      */
-    Final class Woocmmerce_Product_carousel_slider_ultimate
+    Final class WCPCSU_Main
     {
 
         /**
@@ -50,7 +50,7 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
         public $shortcode;
 
         /**
-         * Main Woocmmerce_Product_carousel_slider_ultimate Instance.
+         * Main WCPCSU_Main Instance.
          *
          *
          * @since 1.0
@@ -59,11 +59,11 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
          * @uses instanceof::adl_constants() Setup the constants needed.
          * @uses instanceof::wcpcsu_include() Include the required files.
          * @uses instanceof::wcpcsu_load_textdomain() load the language files.
-         * @return object|Woocmmerce_Product_carousel_slider_ultimate The one true Woocmmerce_Product_carousel_slider_ultimate
+         * @return object|WCPCSU_Main The one true WCPCSU_Main
          */
         public static function instance() {
-            if(!isset(self::$instance) && !(self::$instance instanceof Woocmmerce_Product_carousel_slider_ultimate)) {
-                self::$instance = new Woocmmerce_Product_carousel_slider_ultimate;
+            if(!isset(self::$instance) && !(self::$instance instanceof WCPCSU_Main)) {
+                self::$instance = new WCPCSU_Main;
                 //if woocmmerce plugin not activate
                 if ( !in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
                     add_action( 'admin_notices', array(self::$instance, 'WCPCSU_admin_notice') );
@@ -129,7 +129,7 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
                     if ( ! empty( $wcpscu_data ) && ! is_json_encoded( $wcpscu_data ) ) {
                         $unserialized_data = unserialize( base64_decode( $wcpscu_data ) );
                         
-                        $json_decode_data = Woocmmerce_Product_carousel_slider_ultimate::json_encoded( $unserialized_data );
+                        $json_decode_data = WCPCSU_Main::json_encoded( $unserialized_data );
                         update_post_meta( get_the_ID(), 'wcpscu', $json_decode_data );
                     }
                 }
@@ -318,15 +318,16 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
 
     } //end of class
 
-    function WCPCSU() {
-        return Woocmmerce_Product_carousel_slider_ultimate::instance();
+    function wc_pcsu_plugin() {
+        return WCPCSU_Main::instance();
     }
 
     // Get WCPCSU ( Woocommerce Product Carousel Slider Ultimate plugin ) Running.
     if( ! class_exists('Woocmmerce_Product_carousel_slider_ultimate_Pro') ){
-        WCPCSU();
+        wc_pcsu_plugin();
     }
-    function wpcsu_image_cropping( $attachmentId, $width, $height, $crop = true, $quality = 100 )
+
+    function wc_pcsu_image_cropping( $attachmentId, $width, $height, $crop = true, $quality = 100 )
     {
         $resizer = new Wpcsu_Image_Resizer( $attachmentId );
 
@@ -334,5 +335,3 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
     }
 
 }
-
-

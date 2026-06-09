@@ -51,7 +51,7 @@ class WCPCSU_Meta_Box {
 		wp_nonce_field( 'wcpscu_action', 'wcpscu_nonce' );
 
 		$lcg_svalue = get_post_meta( $post->ID, 'wcpscu', true );
-		$s_value    = Woocmmerce_Product_carousel_slider_ultimate::json_decoded( $lcg_svalue );
+		$s_value    = WCPCSU_Main::json_decoded( $lcg_svalue );
 		$value      = is_array( $s_value ) ? $s_value : array();
 
 		extract( $value );
@@ -71,7 +71,7 @@ class WCPCSU_Meta_Box {
 		}
 
 		if ( ! empty( $_POST['wcpscu'] ) ) {
-			$wcpscu = Woocmmerce_Product_carousel_slider_ultimate::json_encoded( wcpcsu_sanitize_array( $_POST['wcpscu'] ) );
+			$wcpscu = WCPCSU_Main::json_encoded( wcpcsu_sanitize_array( $_POST['wcpscu'] ) );
 			//save the meta value
 			update_post_meta( $post_id, 'wcpscu', $wcpscu );
 		} else {

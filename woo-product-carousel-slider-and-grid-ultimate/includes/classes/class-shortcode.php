@@ -102,7 +102,7 @@ class WCPCSU_Shortcode {
 
 		// get the array of data from the post meta
 		$enc_data   = get_post_meta( $post_id, 'wcpscu', true );
-		$data_array = Woocmmerce_Product_carousel_slider_ultimate::json_decoded( $enc_data );
+		$data_array = WCPCSU_Main::json_decoded( $enc_data );
 		
 		$value      = is_array( $data_array ) ? $data_array : array();
 
@@ -383,7 +383,7 @@ class WCPCSU_Shortcode {
 
 				// crop the image if the cropping is enabled.
 				if ('yes' === $img_crop){
-					$wpcsu_img = wpcsu_image_cropping( $thumb, $crop_image_width, $crop_image_height, true, 100 )['url'];
+					$wpcsu_img = wc_pcsu_image_cropping( $thumb, $crop_image_width, $crop_image_height, true, 100 )['url'];
 				}else{
 					$aazz_thumb = wp_get_attachment_image_src( get_post_thumbnail_id( get_the_ID() ), 'large' );
 					$wpcsu_img = $aazz_thumb['0'];
