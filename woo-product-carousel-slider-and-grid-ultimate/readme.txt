@@ -3,7 +3,7 @@ Contributors: wpwax
 Tags: woocommerce carousel, woocommerce slider, woocommerce grid, woocommerce product slider, woocommerce product carousel, WooCommerce product display, WooCommerce product grid plugin, Dynamic product sliders, WooCommerce product carousel plugin, Customizable product sliders, Responsive WooCommerce carousel, WooCommerce product showcase
 Requires at least: 4.0
 Tested up to: 6.9
-Stable tag: 1.11.0
+Stable tag: 1.12.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,7 @@ Do you need to boost traffic and sales on your WooCommerce-based online store? T
 
 Its usefulness to WooCommerce store owners is multifaceted and can benefit them in a variety of ways. Like, there is no limit to the number of carousels, sliders, or grids that can be created for Featured Products, Older Products, Latest Products, and so on. The Product Slider Carousel can display a collection of items in a smooth and effective manner on any page. It is 100% responsive and works flawlessly on all devices.  
 
-You can generate dynamic shortcodes and display product sliders in pages, posts, custom templates, and even widgets. This plugin also allows you to customize the sliders or grid, like show/hide product price, exclude out-of-stock products, show/hide add to cart button, responsiveness settings, etc. The most salutary feature of the plugin is the ability to create unlimited personalized sliders, carousels, and grids for chosen products as well as for specific categories(Pro).
+You can generate dynamic shortcodes and display product sliders in pages, posts, custom templates, and even widgets. This plugin also allows you to customize the sliders or grid, like show/hide product price, exclude out-of-stock products, show/hide add to cart button, responsiveness settings, etc.
 
 Here is a quick tour of the WooCommerce Product Carousel, Slider & Grid Ultimate plugin to help you get started
 
@@ -144,6 +144,9 @@ Post Grid and Carousel Ultimate plugin is very easy to use. Just follow the foll
 12. Backend: Style Settings
 
 == Changelog ==
+
+= 1.12.0 =
+* Update: Unnecessary changes
 = 1.11.0 =
 * Add: WordPress 6.9 compatibility
 * Code cleanup
