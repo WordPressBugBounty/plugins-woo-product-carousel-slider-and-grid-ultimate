@@ -4,42 +4,27 @@ if( ! defined( 'ABSPATH' ) ) : exit(); endif; // No direct access allowed
 
 function register_block() {
 
-    wp_enqueue_script( 
-        'wcpcsup-gutenberg-js', 
-        WCPCSU_URL . 'build/index.js', 
+    // Registered only; WordPress enqueues it in the block editor via 'editor_script'.
+    wp_register_script(
+        'wcpcsup-gutenberg-js',
+        WCPCSU_URL . 'build/index.js',
         [
-        'wp-block-editor', 
-        'wp-blocks', 
-        'wp-components', 
-        'wp-element', 
-        'wp-i18n', 
+        'wp-block-editor',
+        'wp-blocks',
+        'wp-components',
+        'wp-element',
+        'wp-i18n',
         'wp-server-side-render'
-        ] 
+        ]
     );
-
-    wp_enqueue_style( 'wcpcsup-main', WCPCSU_URL . 'assets/css/style.css' );
-    wp_enqueue_style( 'wcpcsup-swmodal', WCPCSU_URL . 'assets/css/swmodal.css' );
-    wp_enqueue_style( 'wcpcsup-swiper', WCPCSU_URL . 'assets/css/swiper-bundle.min.css' );
-
-    wp_enqueue_script( 'wcpcsup-main-js', WCPCSU_URL . 'assets/js/main.js');
-    wp_enqueue_script( 'wcpcsup-swmodal-js', WCPCSU_URL . 'assets/js/swmodal.js' );
-    wp_enqueue_script( 'wcpcsup-swiper-js', WCPCSU_URL . 'assets/js/swiper-bundle.min.js' );
-
-    wp_localize_script('wcpcsup-swmodal-js','wcpcsu_quick_view',array(
-        'ajax_url'           => admin_url( 'admin-ajax.php' ),
-
-    ));
-    wp_localize_script('wcpcsup-main-js','main_js',array(
-        'handbag_svg'           => WCPCSU_URL .'assets/icons/handbag.svg',
-
-    ));
 
     $attributes = get_attributes_from_metadata( trailingslashit( __DIR__ ) );
 
     register_block_type(
         'wcpcsup/block',
         [
-            'style'           => 'wcpcsu-main',
+            // No 'style' here: classic themes would load it on every page. The shortcode
+            // (and WCPCSU_Main::enqueue_for_current_page()) loads the CSS where it is used.
             'editor_script'   => 'wcpcsup-gutenberg-js',
             'api_version'     => 2,
             'attributes'      => $attributes,
@@ -51,6 +36,7 @@ function register_block() {
 function render_callback( $attributes ) {
     $attributes['h_title_show']                 = ! empty( $attributes['h_title_show'] ) ? 'yes' : 'no';
     $attributes['display_title']                = ! empty( $attributes['display_title'] ) ? 'yes' : 'no';
+    $attributes['filter_tabs']                  = ! empty( $attributes['filter_tabs'] ) ? 'yes' : 'no';
     $attributes['exclude_stock_out']            = ! empty( $attributes['exclude_stock_out'] ) ? 'yes' : 'no';
     $attributes['display_sale_ribbon']          = ! empty( $attributes['display_sale_ribbon'] ) ? 'yes' : 'no';
     $attributes['display_featured_ribbon']      = ! empty( $attributes['display_featured_ribbon'] ) ? 'yes' : 'no';
@@ -61,12 +47,14 @@ function render_callback( $attributes ) {
     $attributes['display_cart']                 = ! empty( $attributes['display_cart'] ) ? 'yes' : 'no';
     $attributes['A_play']                       = ! empty( $attributes['A_play'] ) ? 'yes' : 'no';
     $attributes['repeat_product']               = ! empty( $attributes['repeat_product'] ) ? 'yes' : 'no';
-    $attributes['stop_hover']                   = ! empty( $attributes['stop_hover'] ) ? 'yes' : 'no';
+    // The shortcode (like the saved setting) uses 'true' / 'false' here, not yes/no.
+    $attributes['stop_hover']                   = ! empty( $attributes['stop_hover'] ) ? 'true' : 'false';
     $attributes['marquee']                      = ! empty( $attributes['marquee'] ) ? 'yes' : 'no';
     $attributes['nav_show']                     = ! empty( $attributes['nav_show'] ) ? 'yes' : 'no';
     $attributes['carousel_pagination']          = ! empty( $attributes['carousel_pagination'] ) ? 'yes' : 'no';
     $attributes['grid_pagination']              = ! empty( $attributes['grid_pagination'] ) ? 'yes' : 'no';
     $attributes['img_hover_effect']             = ! empty( $attributes['img_hover_effect'] ) ? 'yes' : 'no';
+    $attributes['img_crop']                     = ! empty( $attributes['img_crop'] ) ? 'yes' : 'no';
 
     return run_shortcode( 'wcpcsu', $attributes );
     
@@ -104,6 +92,30 @@ function run_shortcode( $shortcode, $atts = [] ) {
 }
 
 add_action( 'init', 'register_block' );
+
+/**
+ * Load the preview styles and Swiper into the block editor.
+ *
+ * Assets added on 'enqueue_block_assets' are also loaded inside the iframed editor
+ * canvas, where the block preview is rendered. On the frontend the shortcode
+ * enqueues its own assets, so this only runs in the admin.
+ */
+function wcpcsu_enqueue_block_preview_assets() {
+    if ( ! is_admin() ) {
+        return;
+    }
+
+    $plugin = wc_pcsu_plugin();
+
+    wp_enqueue_style( 'wcpcsup-main', WCPCSU_URL . 'assets/css/style.css', array(), $plugin->file_version( 'assets/css/style.css' ) );
+    wp_enqueue_style( 'wcpcsup-swmodal', WCPCSU_URL . 'assets/css/swmodal.css', array(), $plugin->file_version( 'assets/css/swmodal.css' ) );
+    wp_enqueue_style( 'wcpcsup-swiper', WCPCSU_URL . 'assets/css/swiper-bundle.min.css', array(), $plugin->file_version( 'assets/css/swiper-bundle.min.css' ) );
+
+    // The same carousel script as the frontend; the block calls window.wpcuCarousel.init() on its preview.
+    $plugin->register_build_script( 'wcpcsup-carousel-js', 'carousel' );
+    wp_enqueue_script( 'wcpcsup-carousel-js' );
+}
+add_action( 'enqueue_block_assets', 'wcpcsu_enqueue_block_preview_assets' );
 
 function add_rest_method( $endpoints ) {
     if ( is_wp_version_compatible( '5.5' ) ) {

@@ -72,6 +72,8 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'options' => array(
 					'carousel' => __( 'Carousel', 'woocommerce-product-carousel-slider-and-ultimate' ),
 					'grid' => __( 'Grid', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'list' => __( 'List', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'ticker' => __( 'Ticker', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				),
 				'default' => 'carousel',
 			),
@@ -141,14 +143,87 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 					'latest' 		=> __( 'Latest Products', 'woocommerce-product-carousel-slider-and-ultimate' ),
 					'older' 		=> __( 'Older Products', 'woocommerce-product-carousel-slider-and-ultimate' ),
 					'featured' 		=> __( 'Featured Products', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'handpicked' 	=> __( 'Handpicked Products', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'related' 		=> __( 'Related Products', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				),
 				'default' => 'latest',
+			),
+			array(
+				// Elementor (free) has no product search control, so IDs are typed here.
+				'type'        => Controls_Manager::TEXT,
+				'id'          => 'handpicked_products',
+				'label'       => __( 'Product IDs', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'description' => __( 'Comma-separated, in the order they should appear, e.g. 12, 7, 30.', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'default'     => '',
+				'condition'   => [
+					'products_type' => 'handpicked',
+				],
+			),
+			array(
+				'type'        => Controls_Manager::SELECT,
+				'id'          => 'related_fallback',
+				'label'       => __( 'When There Is No Current Product', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'options'     => array(
+					'latest' => __( 'Show latest products', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'none'   => __( 'Show nothing', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				),
+				'default'     => 'latest',
+				'description' => __( 'Related products follow the product being viewed. Other pages show this instead.', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'condition'   => [
+					'products_type' => 'related',
+				],
 			),
 			array(
 				'type'      => Controls_Manager::TEXT,
 				'id'        => 'total_products',
 				'label'     => __( 'Total Products to Display', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 12,
+			),
+			array(
+				'type'        => Controls_Manager::SWITCHER,
+				'id'          => 'filter_tabs',
+				'label'       => __( 'Category Filter Tabs', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'description' => __( 'Shoppers switch between categories above the products, without reloading the page.', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'default'     => 'no',
+				'separator'   => 'before',
+				'condition'   => [
+					'products_type' => [ 'latest', 'older', 'featured' ],
+				],
+			),
+			array(
+				// A repeater keeps the tabs in the order they are arranged (drag to reorder).
+				'type'          => Controls_Manager::REPEATER,
+				'id'            => 'filter_categories',
+				'label'         => __( 'Tab Categories', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'description'   => __( 'Each category becomes a tab, in this order. A tab shows the products of the Product Type above that are in that category or its subcategories.', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'fields'        => array(
+					array(
+						'name'    => 'category',
+						'label'   => __( 'Category', 'woocommerce-product-carousel-slider-and-ultimate' ),
+						'type'    => Controls_Manager::SELECT,
+						'options' => $this->wpcsu_category_options(),
+						'default' => '',
+					),
+				),
+				'default'       => array(),
+				'title_field'   => '{{{ category }}}',
+				'prevent_empty' => false,
+				'condition'     => [
+					'products_type' => [ 'latest', 'older', 'featured' ],
+					'filter_tabs'   => 'yes',
+				],
+			),
+			array(
+				'type'        => Controls_Manager::TEXT,
+				'id'          => 'filter_all_text',
+				'label'       => __( '"All" Tab Label', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'description' => __( 'The first tab, active when the page loads. It shows the products of the Product Type above (up to "Total Products to Display"), from every category.', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'placeholder' => __( 'All', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'default'     => '',
+				'condition'   => [
+					'products_type' => [ 'latest', 'older', 'featured' ],
+					'filter_tabs'   => 'yes',
+				],
 			),
 			array(
 				'mode' => 'section_end',
@@ -305,9 +380,9 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 			array(
 				'mode'    => 'section_start',
 				'id'      => 'sec_carousel',
-				'label'   => __( 'Carousel', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'label'   => __( 'Carousel / Ticker', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'condition'    => [
-					'layout'          => 'carousel',
+					'layout'          => array( 'carousel', 'ticker' ),
 				],
 			),
 			array(
@@ -315,18 +390,31 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'        => 'A_play',
 				'label'     => __( 'Auto Play', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 'yes',
+				'condition' => array( 'layout' => 'carousel' ),
 			),
 			array(
 				'type'      => Controls_Manager::SWITCHER,
 				'id'        => 'repeat_product',
 				'label'     => __( 'Repeat Product', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 'yes',
+				'condition' => array( 'layout' => 'carousel' ),
 			),
 			array(
 				'type'      => Controls_Manager::SWITCHER,
 				'id'        => 'stop_hover',
 				'label'     => __( 'Stop on Hover', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 'no',
+			),
+			array(
+				'type'      => Controls_Manager::SELECT,
+				'id'        => 'scrool_direction',
+				'label'     => __( 'Scroll Direction', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'options'   => array(
+					'right_left' => __( 'Right to Left', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'left_right' => __( 'Left to Right', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				),
+				'default'   => 'right_left',
+				'condition' => array( 'layout' => 'ticker' ),
 			),
 			array(
 				'type'      => Controls_Manager::TEXT,
@@ -357,6 +445,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'type'      => Controls_Manager::TEXT,
 				'id'        => 'slide_speed',
 				'label'     => __( 'Slide Speed', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'description' => __( 'Ticker: the time one product takes to scroll past (1000 = 1 second).', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 2000,
 			),
 			array(
@@ -364,12 +453,14 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'        => 'slide_time',
 				'label'     => __( 'Slide Timeout', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 2000,
+				'condition' => array( 'layout' => 'carousel' ),
 			),
 			array(
 				'type'      => Controls_Manager::SWITCHER,
 				'id'        => 'nav_show',
 				'label'     => __( 'Enable Navigation', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 'yes',
+				'condition' => array( 'layout' => 'carousel' ),
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
@@ -385,6 +476,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				),
 				'default' => 'bottom-right',
 				'condition'    => [
+					'layout'            => 'carousel',
 					'nav_show'          => 'yes',
 				],
 				'separator' => 'after'
@@ -395,6 +487,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'        => 'carousel_pagination',
 				'label'     => __( 'Enable Pagination', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 'no',
+				'condition' => array( 'layout' => 'carousel' ),
 			),
 			
 			array(
@@ -403,15 +496,16 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 			array(
 				'mode'    => 'section_start',
 				'id'      => 'sec_grid',
-				'label'   => __( 'Grid', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'label'   => __( 'Grid / List', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'condition'    => [
-					'layout'          => 'grid',
+					'layout'          => array( 'grid', 'list' ),
 				],
 			),
 			array(
 				'type'    => Controls_Manager::SELECT,
 				'id'      => 'g_column',
 				'label'   => __( 'Grid Columns', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'condition' => array( 'layout' => 'grid' ),
 				'options' => array(
 					'1' 	=> __( 'Column-1', 'woocommerce-product-carousel-slider-and-ultimate' ),
 					'2' 	=> __( 'Column-2', 'woocommerce-product-carousel-slider-and-ultimate' ),
@@ -424,6 +518,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'type'    => Controls_Manager::SELECT,
 				'id'      => 'g_tablet',
 				'label'   => __( 'Select Columns for Tablet', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'condition' => array( 'layout' => 'grid' ),
 				'options' => array(
 					'1' 	=> __( 'Column-1', 'woocommerce-product-carousel-slider-and-ultimate' ),
 					'2' 	=> __( 'Column-2', 'woocommerce-product-carousel-slider-and-ultimate' ),
@@ -436,6 +531,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'type'    => Controls_Manager::SELECT,
 				'id'      => 'g_mobile',
 				'label'   => __( 'Select Columns for Mobile', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'condition' => array( 'layout' => 'grid' ),
 				'options' => array(
 					'1' 	=> __( 'Column-1', 'woocommerce-product-carousel-slider-and-ultimate' ),
 					'2' 	=> __( 'Column-2', 'woocommerce-product-carousel-slider-and-ultimate' ),
@@ -450,6 +546,20 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'        => 'grid_pagination',
 				'label'     => __( 'Display Pagination', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 'no',
+			),
+
+			array(
+				'type'      => Controls_Manager::SELECT,
+				'id'        => 'grid_pagination_type',
+				'label'     => __( 'Pagination Type', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'options'   => array(
+					'normal'       => __( 'Normal (page reload)', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'ajax_numbers' => __( 'Ajax Numbers (no page reload)', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				),
+				'default'   => 'normal',
+				'condition' => array(
+					'grid_pagination' => 'yes',
+				),
 			),
 			
 			array(
@@ -2113,7 +2223,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'id'      => 'grid_pagination_tab',
 				'label'   => __( 'Grid Pagination', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'condition'    => [
-					'layout'				=> 'grid',
+					'layout'				=> array( 'grid', 'list' ),
 					'grid_pagination'       => 'yes',
 				],
 			),
@@ -2410,6 +2520,11 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 			'header_position'               => $settings['header_position'] ? $settings['header_position'] : 'middle',
 			'display_title'                 => $settings['display_title'] ? $settings['display_title'] : 'no',
 			'products_type'                 => $settings['products_type'] ? $settings['products_type'] : 'latest',
+			'handpicked_products'           => ! empty( $settings['handpicked_products'] ) ? $settings['handpicked_products'] : '',
+			'related_fallback'              => ! empty( $settings['related_fallback'] ) ? $settings['related_fallback'] : 'latest',
+			'filter_tabs'                   => ! empty( $settings['filter_tabs'] ) ? $settings['filter_tabs'] : 'no',
+			'filter_categories'             => ! empty( $settings['filter_categories'] ) && is_array( $settings['filter_categories'] ) ? implode( ',', array_filter( wp_list_pluck( $settings['filter_categories'], 'category' ) ) ) : '',
+			'filter_all_text'               => ! empty( $settings['filter_all_text'] ) ? $settings['filter_all_text'] : '',
 			'display_sale_ribbon'           => $settings['display_sale_ribbon'] ? $settings['display_sale_ribbon'] : 'no',
 			'sale_ribbon_text'              => $settings['sale_ribbon_text'] ? $settings['sale_ribbon_text'] : 'Sale!',
 			'sale_ribbon_position'          => $settings['sale_ribbon_position'] ? $settings['sale_ribbon_position'] : 'top_left',
@@ -2429,7 +2544,9 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 			'crop_image_height'             => $settings['crop_image_height'] ? $settings['crop_image_height'] : '250',
 			'auto_play'                 	=> $settings['A_play'] ? $settings['A_play'] : 'no',
 			'repeat_product'                => $settings['repeat_product'] ? $settings['repeat_product'] : 'no',
-			'stop_hover'                 	=> $settings['stop_hover'] ? false : true,
+			// Carousel: kept as it always was (pauses on hover whatever the switch says). Ticker: follows the switch.
+			'stop_hover'                 	=> 'ticker' === $settings['layout'] ? ( 'yes' === $settings['stop_hover'] ? 'true' : 'false' ) : ( $settings['stop_hover'] ? false : true ),
+			'scrool_direction'              => ! empty( $settings['scrool_direction'] ) ? $settings['scrool_direction'] : 'right_left',
 			'c_desktop'                 	=> $settings['c_desktop'] ? $settings['c_desktop'] : '3',
 			'c_desktop_small'               => $settings['c_desktop_small'] ? $settings['c_desktop_small'] : '3',
 			'c_tablet'                 		=> $settings['c_tablet'] ? $settings['c_tablet'] : '2',
@@ -2440,10 +2557,12 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 			'nav_position'                 	=> $settings['nav_position'] ? $settings['nav_position'] : 'bottom-right',
 			'nav_back_color'                => isset( $settings['nav_back_color'] ) && $settings['nav_back_color'] ? $settings['nav_back_color'] : '#f7f7fa',
 			'nav_border_color'              => isset( $settings['nav_border_color'] ) && $settings['nav_border_color'] ? $settings['nav_border_color'] : '#f7f7fa',
-			'g_column'             			=> $settings['g_column'] ? $settings['g_column'] : '3',
+			'carousel_pagination'           => isset( $settings['carousel_pagination'] ) && $settings['carousel_pagination'] ? $settings['carousel_pagination'] : 'no',
+			'g_column'            			=> $settings['g_column'] ? $settings['g_column'] : '3',
 			'g_tablet'             			=> $settings['g_tablet'] ? $settings['g_tablet'] : '2',
 			'g_mobile'             			=> $settings['g_mobile'] ? $settings['g_mobile'] : '1',
 			'grid_pagination'             	=> $settings['grid_pagination'] ? $settings['grid_pagination'] : 'no',
+			'grid_pagination_type'          => ! empty( $settings['grid_pagination_type'] ) ? $settings['grid_pagination_type'] : 'normal',
 			'header_font_color'        		=> $settings['header_font_color'] ? $settings['header_font_color'] : '#303030',
 			'title_font_color'        		=> isset( $settings['title_font_color'] ) && $settings['title_font_color'] ? $settings['title_font_color'] : '#363940',
 			'title_hover_font_color'        => isset( $settings['title_hover_font_color'] ) && $settings['title_hover_font_color'] ? $settings['title_hover_font_color'] : '#ff5500',
@@ -2457,6 +2576,35 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 		);
 		$this->run_shortcode( 'wcpcsu', $atts );
 		
+	}
+
+	/**
+	 * Product categories for the "Tab Categories" select, in tree order (slug => name).
+	 *
+	 * @return array
+	 */
+	public function wpcsu_category_options() {
+		$terms = get_terms( array(
+			'taxonomy'   => 'product_cat',
+			'hide_empty' => false,
+		) );
+
+		$options = array( '' => __( '— Select —', 'woocommerce-product-carousel-slider-and-ultimate' ) );
+		if ( is_wp_error( $terms ) ) {
+			return $options;
+		}
+
+		$walk = function ( $parent, $depth ) use ( &$walk, $terms, &$options ) {
+			foreach ( $terms as $term ) {
+				if ( (int) $term->parent === $parent ) {
+					$options[ $term->slug ] = str_repeat( '— ', $depth ) . $term->name;
+					$walk( (int) $term->term_id, $depth + 1 );
+				}
+			}
+		};
+		$walk( 0, 0 );
+
+		return $options;
 	}
 
 	public function display_image( $atts ) {

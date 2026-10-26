@@ -8,3 +8,13 @@
         transform: rotate(360deg);
     }
 }
+/* Ticker: moves the row by one set of cards (--wpcu-tickerDistance, set by build/carousel.js). */
+@keyframes wpcuTicker {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    100% {
+        transform: translate3d(var(--wpcu-tickerDistance, 0), 0, 0);
+    }
+}

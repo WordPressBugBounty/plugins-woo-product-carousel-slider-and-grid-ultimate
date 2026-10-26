@@ -2,7 +2,7 @@
     <div class="wpcu-product__content">
         <div class="wpcu-product__img wpcu-pos-relative">
             <a href="<?php echo esc_url( get_the_permalink() ); ?>">
-                <img src="<?php echo esc_url( $wpcsu_img ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>">
+                <?php echo $wpcsu_img_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built and escaped by wcpcsu_product_image_html(). ?>
             </a>
 
             <?php wpcsu_ribbon_badge( $ribbon_args, $this->aazz_show_discount_percentage() ); ?>

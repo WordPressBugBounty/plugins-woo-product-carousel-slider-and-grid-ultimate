@@ -13,14 +13,26 @@ class WCPCSU_Shortcode {
 
 	const SHORTCODE_TAG = 'wcpcsu';
 
+	/**
+	 * The WP_Query of the last render(), so callers can read found_posts / max_num_pages.
+	 *
+	 * @var WP_Query|null
+	 */
+	public $last_query = null;
+
 	public function __construct () {
 		add_shortcode( self::SHORTCODE_TAG, array( $this,'register' ) );
 		add_action( 'wp_ajax_ajax_quick_view', array( $this, 'ajax_quick_view' ) );
 		add_action( 'wp_ajax_nopriv_ajax_quick_view', array( $this, 'ajax_quick_view') );
 	}
 
-	public function register( $atts, $content = null ) {
-		$atts = shortcode_atts( array(
+	/**
+	 * Attributes the shortcode accepts, with their defaults. Anything else is dropped.
+	 *
+	 * @return array
+	 */
+	public function shortcode_defaults() {
+		return array(
 			'id' 						=>  0,
 			'layout'                    => '',
             'theme'                     => '',
@@ -50,6 +62,7 @@ class WCPCSU_Shortcode {
             'auto_play'                 => '',
             'repeat_product'            => '',
             'stop_hover'                => '',
+            'scrool_direction'          => '', // right_left | left_right (ticker only in Free; same key and values as Pro)
             'c_desktop'                 => '',
             'c_desktop_small'           => '',
             'c_tablet'                  => '',
@@ -71,6 +84,7 @@ class WCPCSU_Shortcode {
             'g_tablet'                  => '',
             'g_mobile'                  => '',
             'grid_pagination'           => '',
+            'grid_pagination_type'      => '', // normal | ajax_numbers (grid only)
             'pagi_color'                => '',
             'pagi_border_color'         => '',
             'pagi_back_color'           => '',
@@ -93,20 +107,52 @@ class WCPCSU_Shortcode {
             'cart_button_hover_color'   => '',
             'cart_button_hover_font_color'    => '',
             'ribbon_bg_color'          	=> '',
-		), $atts, self::SHORTCODE_TAG );
+            'handpicked_products'       => '', // comma-separated product IDs, in display order
+            'related_fallback'          => '', // latest | none
+            'filter_tabs'               => '', // yes | no: category tabs above the products
+            'filter_categories'         => '', // comma-separated product_cat slugs shown as tabs, in order
+            'filter_all_text'           => '', // label of the first ("All") tab
+		);
+	}
+
+	public function register( $atts, $content = null ) {
+		$atts = shortcode_atts( $this->shortcode_defaults(), $atts, self::SHORTCODE_TAG );
 		
 		$post_id = absint( $atts['id'] );
-		
-
-		$this->wcpcsu_style_files();
 
 		// get the array of data from the post meta
 		$enc_data   = get_post_meta( $post_id, 'wcpscu', true );
 		$data_array = WCPCSU_Main::json_decoded( $enc_data );
-		
+
+		return $this->render( $data_array, $atts );
+	}
+
+	/**
+	 * Render a carousel/grid from a settings array.
+	 *
+	 * The shortcode passes the saved settings; the admin live preview passes the
+	 * unsaved form values, so both produce exactly the same markup.
+	 *
+	 * @param array $data_array Settings (the decoded `wcpscu` meta).
+	 * @param array $atts       Shortcode attributes, already passed through shortcode_atts().
+	 * @param array $context    Optional. `cards_only` (bool): print only the product cards, without
+	 *                          header, wrapper, navigation, pagination or modal, and enqueue nothing.
+	 *                          `paged` (int): the page to query, instead of the one in the URL.
+	 *                          `category` (string): a product_cat slug to narrow the products to.
+	 *                          The query used is kept in $this->last_query.
+	 * @return string
+	 */
+	public function render( $data_array, $atts, $context = array() ) {
+		$cards_only = ! empty( $context['cards_only'] );
+
+		if ( ! $cards_only ) {
+			$this->wcpcsu_style_files();
+		}
+
 		$value      = is_array( $data_array ) ? $data_array : array();
 
-		extract( $value );
+		// EXTR_SKIP: a settings key can't replace the arguments or $cards_only.
+		extract( $value, EXTR_SKIP );
 
 		$rand_id                 = rand();
 		$total_products          = ! empty( $total_products ) ? intval( $total_products ) : 6;
@@ -128,6 +174,7 @@ class WCPCSU_Shortcode {
 		$g_tablet                = ! empty( $g_tablet ) ? intval( $g_tablet ) : 2;
 		$g_mobile                = ! empty( $g_mobile ) ? intval( $g_mobile ) : 1;
 		$grid_pagination         = ! empty( $grid_pagination ) ? $grid_pagination : 'no';
+		$grid_pagination_type    = ! empty( $grid_pagination_type ) ? $grid_pagination_type : 'normal';
 		$slide_time              = ! empty( $slide_time )  ? $slide_time : '2000' ;
 
 		$display_title           = ! empty( $display_title ) ? $display_title : 'yes';
@@ -152,15 +199,17 @@ class WCPCSU_Shortcode {
 		$quick_view_icon_color          = ! empty( $quick_view_icon_color[ $theme ] ) ? $quick_view_icon_color[ $theme ] : '#ffffff';
 		$quick_view_icon_back_color     = ! empty( $quick_view_icon_back_color[ $theme ] ) ? $quick_view_icon_back_color[ $theme ] : '#ff5500';
 
-		$paged                          =  wcpcsu_get_paged_num();
+		$paged                          = ! empty( $context['paged'] ) ? absint( $context['paged'] ) : wcpcsu_get_paged_num();
 		$paged                          = ! empty( $paged ) ? $paged : '';
-		$loop                           = $this->parse_query( $data_array, $atts );
+		$loop                           = $this->parse_query( $data_array, $atts, $context );
+		$this->last_query               = $loop;
 
 		// carousel settings
 		$slide_speed                = ! empty( $slide_speed ) ? $slide_speed : '2000';
 		$A_play                     = ! empty( $A_play ) ? $A_play : 'yes';
 		$repeat_product             = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 		$stop_hover                 = ! empty( $stop_hover ) ? $stop_hover : true;
+		$scrool_direction           = ! empty( $scrool_direction ) ? $scrool_direction : 'right_left';
 		
 
 		// carousel navigation settings
@@ -192,16 +241,39 @@ class WCPCSU_Shortcode {
 
 		$header_title     			= ! empty( $header_title ) ? $header_title : '';
 
-		$allowed_layouts 			= array( 'carousel', 'grid' );
+		// Pro layouts (thumbnails, masonry, tabbed) fall back to carousel.
+		$allowed_layouts 			= array( 'carousel', 'grid', 'list', 'ticker' );
 		$allowed_themes  			= array( 'theme_1', 'theme_2', 'theme_3' );
+
+		// Settings without a default above. A carousel without saved settings (no `id`, e.g. the
+		// AJAX route or an id-less shortcode) doesn't define them; they get their defaults below.
+		$display_sale_ribbon        = isset( $display_sale_ribbon ) ? $display_sale_ribbon : '';
+		$sale_ribbon_text           = isset( $sale_ribbon_text ) ? $sale_ribbon_text : '';
+		$sale_ribbon_position       = isset( $sale_ribbon_position ) ? $sale_ribbon_position : '';
+		$display_featured_ribbon    = isset( $display_featured_ribbon ) ? $display_featured_ribbon : '';
+		$feature_ribbon_text        = isset( $feature_ribbon_text ) ? $feature_ribbon_text : '';
+		$featured_ribbon_position   = isset( $featured_ribbon_position ) ? $featured_ribbon_position : '';
+		$display_sold_out_ribbon    = isset( $display_sold_out_ribbon ) ? $display_sold_out_ribbon : '';
+		$sold_out_ribbon_text       = isset( $sold_out_ribbon_text ) ? $sold_out_ribbon_text : '';
+		$sold_out_ribbon_position   = isset( $sold_out_ribbon_position ) ? $sold_out_ribbon_position : '';
+		$display_discount_ribbon    = isset( $display_discount_ribbon ) ? $display_discount_ribbon : '';
+		$discount_ribbon_position   = isset( $discount_ribbon_position ) ? $discount_ribbon_position : '';
+		$c_desktop                  = isset( $c_desktop ) ? $c_desktop : '';
+		$c_desktop_small            = isset( $c_desktop_small ) ? $c_desktop_small : '';
+		$c_tablet                   = isset( $c_tablet ) ? $c_tablet : '';
+		$c_mobile                   = isset( $c_mobile ) ? $c_mobile : '';
 
 		// shortcode attribute
         $layout                     = ! empty( $atts['layout'] ) ? $atts['layout'] : $layout;
 		$layout 					= in_array( $layout, $allowed_layouts, true ) ? $layout : 'carousel';
-		
+		// The ticker uses the Carousel tab's columns and speed; the list is a one-column grid
+		// (products per page and pagination from the Grid tab).
+		$is_ticker 					= 'ticker' === $layout;
+		$is_grid 					= in_array( $layout, array( 'grid', 'list' ), true );
+
         $theme                      = ! empty( $atts['theme'] ) ? $atts['theme'] : $theme;
 		$theme 						= in_array( $theme, $allowed_themes, true ) ? $theme : 'theme_1';
-        $total_products             = ! empty( $atts['total_products'] ) ? $atts['total_products'] : $total_products;
+        $total_products            = ! empty( $atts['total_products'] ) ? $atts['total_products'] : $total_products;
         $h_title_show               = ! empty( $atts['h_title_show'] ) ? $atts['h_title_show'] : $h_title_show;
         $header_title               = ! empty( $atts['header_title'] ) ? $atts['header_title'] : $header_title;
         $header_position            = ! empty( $atts['header_position'] ) ? $atts['header_position'] : $header_position;
@@ -227,6 +299,7 @@ class WCPCSU_Shortcode {
         $A_play                     = ! empty( $atts['auto_play'] ) ? $atts['auto_play'] : $A_play;
         $repeat_product             = ! empty( $atts['repeat_product'] ) ? $atts['repeat_product'] : $repeat_product;
         $stop_hover                 = ! empty( $atts['stop_hover'] ) ? $atts['stop_hover'] : $stop_hover;
+        $scrool_direction           = ! empty( $atts['scrool_direction'] ) ? $atts['scrool_direction'] : $scrool_direction;
         $c_desktop                  = ! empty( $atts['c_desktop'] ) ? $atts['c_desktop'] : $c_desktop;
         $c_desktop_small            = ! empty( $atts['c_desktop_small'] ) ? $atts['c_desktop_small'] : $c_desktop_small;
         $c_tablet                   = ! empty( $atts['c_tablet'] ) ? $atts['c_tablet'] : $c_tablet;
@@ -248,6 +321,11 @@ class WCPCSU_Shortcode {
         $g_tablet                   = ! empty( $atts['g_tablet'] ) ? $atts['g_tablet'] : $g_tablet;
         $g_mobile                   = ! empty( $atts['g_mobile'] ) ? $atts['g_mobile'] : $g_mobile;
         $grid_pagination            = ! empty( $atts['grid_pagination'] ) ? $atts['grid_pagination'] : $grid_pagination;
+        $grid_pagination_type       = ! empty( $atts['grid_pagination_type'] ) ? $atts['grid_pagination_type'] : $grid_pagination_type;
+		// After the attribute override, so an attribute is checked too. Ajax numbers is grid/list only
+		// (a carousel keeps dots/arrows); Pro values (load_more, infinite) fall back to normal in Free.
+		$allowed_pagination_types 	= array( 'normal', 'ajax_numbers' );
+		$grid_pagination_type 		= ( $is_grid && in_array( $grid_pagination_type, $allowed_pagination_types, true ) ) ? $grid_pagination_type : 'normal';
         $pagi_color                 = ! empty( $atts['pagi_color'] ) ? $atts['pagi_color'] : $pagi_color;
         $pagi_border_color          = ! empty( $atts['pagi_border_color'] ) ? $atts['pagi_border_color'] : $pagi_border_color;
         $pagi_back_color            = ! empty( $atts['pagi_back_color'] ) ? $atts['pagi_back_color'] : $pagi_back_color;
@@ -304,6 +382,22 @@ class WCPCSU_Shortcode {
 		$carousel_tablet_column     = ! empty( $c_tablet ) ? intval( $c_tablet ) : 2;
 		$carousel_mobile_column     = ! empty( $c_mobile ) ? intval( $c_mobile ) : 1;
 
+		// Cards only (AJAX filters): no products prints nothing; the caller reports the empty result.
+		if ( $cards_only ) {
+			ob_start();
+			if ( $loop->have_posts() ) {
+				include WCPCSU_INC_DIR . 'template/cards.php';
+			}
+			return ob_get_clean();
+		}
+
+		// "Related" with fallback "none" prints nothing (not "No products found") outside single product pages.
+		// Editors get a short note instead (frontend, live preview, block editor), so the empty spot is explained.
+		$related_fallback = ! empty( $atts['related_fallback'] ) ? $atts['related_fallback'] : ( ! empty( $related_fallback ) ? $related_fallback : 'latest' );
+		if ( 'related' == $products_type && 'none' == $related_fallback && ! $loop->have_posts() ) {
+			return current_user_can( 'edit_posts' ) ? $this->related_none_notice() : '';
+		}
+
 		$header_class = '';
 
 		if( 'middle' == $header_position ) {
@@ -311,6 +405,16 @@ class WCPCSU_Shortcode {
 		} elseif( 'right' == $header_position ) {
 			$header_class = 'wpcu-products__header--right';
 		}
+
+		// Category filter tabs: the categories that still exist, in the chosen order.
+		$filter_terms = array();
+		foreach ( WCPCSU_Products_Route::tab_categories( $data_array, $atts ) as $filter_slug ) {
+			$filter_term = get_term_by( 'slug', $filter_slug, 'product_cat' );
+			if ( $filter_term ) {
+				$filter_terms[] = $filter_term;
+			}
+		}
+		$filter_all_text = ! empty( $atts['filter_all_text'] ) ? $atts['filter_all_text'] : ( ! empty( $filter_all_text ) ? $filter_all_text : __( 'All', 'woocommerce-product-carousel-slider-and-grid-ultimate' ) );
 
 		ob_start();
 
@@ -324,10 +428,38 @@ class WCPCSU_Shortcode {
 			<h2><?php echo esc_html( $header_title ); ?></h2>
 		</div>
 		<?php } ?>
+<?php if ( $filter_terms ) {
+			// The products route renders the cards of a tab from these signed attributes (see WCPCSU_Products_Route).
+			// Accent: the title hover color, which every theme uses as readable text on white (theme_3's cart button is white).
+			$filter_query = WCPCSU_Products_Route::sign( $atts );
+			$filter_query['url']   = rest_url( WCPCSU_Products_Route::REST_NAMESPACE . '/products' );
+			$filter_query['empty'] = __( 'No products found', 'woocommerce-product-carousel-slider-and-grid-ultimate' );
+			?>
+		<div class="wpcu-filter wpcu-filter--<?php echo esc_attr( $header_position ); ?>"
+			style="--wpcu-filterActiveBg: <?php echo esc_attr( $title_hover_font_color ); ?>;"
+			data-wpcu-filter="<?php echo esc_attr( wp_json_encode( $filter_query ) ); ?>">
+			<div class="wpcu-filter__tabs" role="group" aria-label="<?php esc_attr_e( 'Product categories', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">
+				<button type="button" class="wpcu-filter__tab wpcu-filter__tab--active" data-wpcu-category="" aria-pressed="true"><?php echo esc_html( $filter_all_text ); ?></button>
+				<?php foreach ( $filter_terms as $filter_term ) { ?>
+				<button type="button" class="wpcu-filter__tab" data-wpcu-category="<?php echo esc_attr( $filter_term->slug ); ?>" aria-pressed="false"><?php echo esc_html( $filter_term->name ); ?></button>
+				<?php } ?>
+			</div>
+			<p class="wpcu-filter__status" role="status" hidden></p>
+		</div>
+		<?php } ?>
 
 		<div
-		class="wpcu-products wpcu-<?php echo esc_attr( $theme ); ?> wpcu-lazy-load <?php echo ( 'carousel' == $layout ) ? 'wpcu-carousel' : ''; ?>"
+		class="wpcu-products wpcu-<?php echo esc_attr( $theme ); ?><?php echo ( 'carousel' == $layout ) ? ' wpcu-carousel' : ''; ?><?php echo $is_ticker ? ' wpcu-ticker' . ( 'true' == $stop_hover ? ' wpcu-ticker--pause' : '' ) . ( 'left_right' === $scrool_direction ? ' wpcu-ticker--reverse' : '' ) : ''; ?><?php echo ( 'list' === $layout ) ? ' wpcu-layout-list' : ''; ?><?php echo ( 'yes' === $img_crop ) ? ' wpcu-products--img-ratio' : ''; ?>"
 		style="
+			<?php if ( 'yes' === $img_crop ) { // Reserves the image height before it loads. ?>
+			--wpcu-imgRatio: <?php echo esc_attr( (int) $crop_image_width . ' / ' . (int) $crop_image_height ); ?>;
+			<?php } ?>
+			<?php if ( 'carousel' == $layout || $is_ticker ) { // Columns per breakpoint: the carousel's layout before Swiper starts, the ticker's card width. ?>
+			--wpcu-cols-sm: <?php echo esc_attr( (int) $carousel_mobile_column ); ?>;
+			--wpcu-cols-md: <?php echo esc_attr( (int) $carousel_tablet_column ); ?>;
+			--wpcu-cols-lg: <?php echo esc_attr( (int) $carousel_laptop_column ); ?>;
+			--wpcu-cols-xl: <?php echo esc_attr( (int) $carousel_desktop_column ); ?>;
+			<?php } ?>
 			--wpcu-productTitleSize: <?php echo esc_attr( $title_font_size ); ?>px;
 			--wpcu-productTitleColor: <?php echo esc_attr( $title_font_color ); ?>;
 			--wpcu-productTitleColorHover: <?php echo esc_attr( $title_hover_font_color ); ?>;
@@ -367,49 +499,39 @@ class WCPCSU_Shortcode {
 			"992": {"slidesPerView": "<?php echo esc_attr( $carousel_laptop_column ); ?>", "spaceBetween": "30"},
 			"1200": {"slidesPerView": "<?php echo esc_attr( $carousel_desktop_column ); ?>", "spaceBetween": "30"}
 		}'
+		<?php } elseif ( $is_ticker ) { // Time one card takes to scroll past (build/carousel.js, initTicker()). ?>
+		data-wpcu-speed="<?php echo esc_attr( (int) $slide_speed ); ?>"
 		<?php } ?>
 		>
 		<?php if( ( 'carousel' == $layout && 'yes' == $nav_show ) && ( 'top-left' == $nav_position || 'top-right' == $nav_position || 'top-middle' == $nav_position || 'middle' == $nav_position )  ) {
 				include WCPCSU_INC_DIR . 'template/navigation.php';
 		} ?>
-		<div class="<?php echo ( 'carousel' == $layout ) ? 'swiper-wrapper' : 'wpcu-row wpcu-column-' . esc_attr( $g_column ) . ' wpcu-column-md-' . esc_attr( $g_tablet ) . ' wpcu-column-sm-' . esc_attr( $g_mobile ) . ''; ?>">
 		<?php
-			
-			while( $loop->have_posts() ) : $loop->the_post();
-
-				global $post, $product;
-
-				$thumb = get_post_thumbnail_id();
-
-				// crop the image if the cropping is enabled.
-				if ('yes' === $img_crop){
-					$wpcsu_img = wc_pcsu_image_cropping( $thumb, $crop_image_width, $crop_image_height, true, 100 )['url'];
-				}else{
-					$aazz_thumb = wp_get_attachment_image_src( get_post_thumbnail_id( get_the_ID() ), 'large' );
-					$wpcsu_img = $aazz_thumb['0'];
-				}
-
-				$wpcsu_img  = ! empty( $wpcsu_img ) ? $wpcsu_img : wc_placeholder_img_src();
-				$sale_price = $product->get_sale_price();
-				$ratings    = ( ( $product->get_average_rating() / 5 ) * 100 );
-
-				include WCPCSU_INC_DIR . 'template/theme/' . $theme . '.php';
-
-			endwhile;
-			
-			wp_reset_postdata();
-			?>
+		if ( 'carousel' == $layout ) {
+			$cards_class = 'swiper-wrapper';
+		} elseif ( $is_ticker ) {
+			$cards_class = 'wpcu-ticker__track';
+		} elseif ( 'list' === $layout ) {
+			$cards_class = 'wpcu-row wpcu-list';
+		} else {
+			$cards_class = 'wpcu-row wpcu-column-' . $g_column . ' wpcu-column-md-' . $g_tablet . ' wpcu-column-sm-' . $g_mobile;
+		}
+		?>
+		<div class="<?php echo esc_attr( $cards_class ); ?>">
+		<?php include WCPCSU_INC_DIR . 'template/cards.php'; ?>
 
 			</div>
 			<?php if( ( 'carousel' == $layout && 'yes' == $nav_show ) && ( 'bottom-left' == $nav_position || 'bottom-right' == $nav_position || 'bottom-middle' == $nav_position ) ) {
 				include WCPCSU_INC_DIR . 'template/navigation.php';
 			 } ?>
-			 <?php if( ( 'grid' == $layout && 'yes' == $grid_pagination ) || ( 'carousel' == $layout && 'yes' ==  $carousel_pagination ) ) {
+			 <?php if( ( $is_grid && 'yes' == $grid_pagination ) || ( 'carousel' == $layout && 'yes' ==  $carousel_pagination ) ) {
 				include WCPCSU_INC_DIR . 'template/pagination.php';
 			 } ?>
 		</div><!-- ends: .wpcu-products -->
 		<?php
-			if( 'theme_2' == $theme ){
+			// Quick view only exists in theme_2; load its modal and assets only when it is shown.
+			if( 'theme_2' == $theme && 'yes' == $quick_view ){
+				$this->enqueue_quick_view_files();
 				include WCPCSU_INC_DIR . 'template/quick-view.php';
 			}
 		?>
@@ -423,21 +545,33 @@ class WCPCSU_Shortcode {
 		return ob_get_clean();
 	}
 
-	public function parse_query( $data_array, $atts ) {
+	/**
+	 * Build the products query from the settings.
+	 *
+	 * @param array $data_array Settings (the decoded `wcpscu` meta).
+	 * @param array $atts       Shortcode attributes, already passed through shortcode_atts().
+	 * @param array $context    Optional. `paged` (int): query this page instead of the one in the URL,
+	 *                          also for a carousel or a grid without pagination (AJAX filters, load more).
+	 *                          `category` (string): only products in this product_cat slug (category tab).
+	 * @return WP_Query
+	 */
+	public function parse_query( $data_array, $atts, $context = array() ) {
 		$value = is_array( $data_array ) ? $data_array : array();
-		extract( $value );
-		$paged                          =  wcpcsu_get_paged_num();
+		extract( $value, EXTR_SKIP );
+		$paged                          = ! empty( $context['paged'] ) ? absint( $context['paged'] ) : wcpcsu_get_paged_num();
 		$paged                          = ! empty( $paged ) ? $paged : '';
-		$total_products                 = ! empty( $atts['total_products'] ) ? $atts['total_products'] : $total_products;
-        $products_type                  = ! empty( $atts['products_type'] ) ? $atts['products_type'] : $products_type;
-		$layout                         = ! empty( $atts['layout'] ) ? $atts['layout'] : $layout;
-        $grid_pagination                = ! empty( $atts['grid_pagination'] ) ? $atts['grid_pagination'] : $grid_pagination;
+		$total_products                 = ! empty( $atts['total_products'] ) ? $atts['total_products'] : ( isset( $total_products ) ? $total_products : '' );
+        $products_type                  = ! empty( $atts['products_type'] ) ? $atts['products_type'] : ( isset( $products_type ) ? $products_type : '' );
+		$layout                         = ! empty( $atts['layout'] ) ? $atts['layout'] : ( isset( $layout ) ? $layout : '' );
+        $grid_pagination                = ! empty( $atts['grid_pagination'] ) ? $atts['grid_pagination'] : ( isset( $grid_pagination ) ? $grid_pagination : '' );
+		$handpicked_products            = ! empty( $atts['handpicked_products'] ) ? $atts['handpicked_products'] : ( isset( $handpicked_products ) ? $handpicked_products : array() );
+		$related_fallback               = ! empty( $atts['related_fallback'] ) ? $atts['related_fallback'] : ( ! empty( $related_fallback ) ? $related_fallback : 'latest' );
 		$common_args = array(
 			'post_type'      => 'product',
 			'posts_per_page' => ! empty( $total_products ) ? intval( $total_products ) : 12,
 			'post_status'    => 'publish',
 		);
-		if( 'grid' == $layout && 'yes' == $grid_pagination ) {
+		if( ( in_array( $layout, array( 'grid', 'list' ), true ) && 'yes' == $grid_pagination ) || ! empty( $context['paged'] ) ) {
 			$common_args['paged']    = $paged;
 		}
 		if( $products_type == "latest" ) {
@@ -466,10 +600,47 @@ class WCPCSU_Shortcode {
 			);
 			$args = array_merge( $common_args, $featured_args );
 		}
+		elseif( $products_type == "handpicked" ) {
+			$ids = wcpcsu_parse_id_list( $handpicked_products );
+			$handpicked_args = array(
+				'post__in' => $ids ? $ids : array( 0 ), // nothing picked yet: no products
+				'orderby'  => 'post__in',            // keep the order the products were arranged in
+			);
+			// Show every picked product, unless the grid paginates them.
+			if ( empty( $common_args['paged'] ) ) {
+				$handpicked_args['posts_per_page'] = max( 1, count( $ids ) );
+			}
+			$args = array_merge( $common_args, $handpicked_args );
+		}
+		elseif( $products_type == "related" ) {
+			$current_id = wcpcsu_current_product_id();
+			// wc_get_related_products() is cached by WooCommerce per product (transient, flushed on product save).
+			$ids        = $current_id ? wc_get_related_products( $current_id, $common_args['posts_per_page'] ) : array();
+
+			if ( $ids ) {
+				$args = array_merge( $common_args, array( 'post__in' => array_map( 'absint', $ids ), 'orderby' => 'post__in' ) );
+			} elseif ( 'none' == $related_fallback ) {
+				$args = array_merge( $common_args, array( 'post__in' => array( 0 ) ) );
+			} else {
+				$args = $common_args; // fallback: latest products
+			}
+		}
 
 		else {
 			$args = $common_args;
 		}
+
+		// Category tab (AJAX filter): narrows the saved product type to one category, children included.
+		// The caller checks that the category is one of the carousel's tabs.
+		if ( ! empty( $context['category'] ) ) {
+			$args['tax_query']   = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
+			$args['tax_query'][] = array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => (string) $context['category'],
+			);
+		}
+
 		$loop = new WP_Query( $args );
 
 		return $loop;
@@ -517,35 +688,60 @@ class WCPCSU_Shortcode {
 		));
 	}
 
+	/**
+	 * Note shown to editors where a "Related" carousel with fallback "Show nothing" has nothing to show.
+	 * Visitors get no output at all.
+	 *
+	 * @return string
+	 */
+	public function related_none_notice() {
+		return '<div class="wpcu-products-notice" role="note">'
+			. '<strong>' . esc_html__( 'Related products carousel', 'woocommerce-product-carousel-slider-and-grid-ultimate' ) . '</strong> '
+			. esc_html__( 'This carousel shows products related to the product being viewed, so it only shows products on single product pages. Here it shows nothing, because "When There Is No Current Product" is set to "Show nothing".', 'woocommerce-product-carousel-slider-and-grid-ultimate' )
+			. ' <em>' . esc_html__( 'Only logged-in editors see this note; visitors see nothing.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ) . '</em>'
+			. '</div>';
+	}
+
 	public function wcpcsu_style_files () {
 		wp_enqueue_style( 'wcpcsu-main' );
-		wp_enqueue_style( 'wcpcsu-style' );
-		wp_enqueue_style( 'wcpcsu-swmodal' );
 		wp_enqueue_style( 'wcpcsu-swiper' );
 
-		wp_enqueue_script( 'wcpcsu-swmodal-js' );
-		wp_enqueue_script( 'wcpcsu-swiper-js' );
+		// Swiper is bundled in this script.
 		wp_enqueue_script( 'wcpcsu-main-js' );
 	}
 
+	/**
+	 * Quick view modal assets, loaded only by carousels that show quick view buttons.
+	 */
+	public function enqueue_quick_view_files() {
+		wp_enqueue_style( 'wcpcsu-swmodal' );
+		wp_enqueue_script( 'wcpcsu-swmodal-js' );
+	}
+
+	/**
+	 * Quick view modal content for one product.
+	 *
+	 * No nonce: it only returns what the product page shows anyone, and the buttons it serves
+	 * come from cacheable markup (full-page caches, the public products route), where a
+	 * per-user nonce can't be valid for every visitor. The product itself is checked instead.
+	 * The buttons still print `data-nonce` for older markup; it is ignored.
+	 */
 	public function ajax_quick_view() {
-		$nonce          = ! empty( $_POST['nonce'] ) ? $_POST['nonce'] : '';
-		$product_id     = ! empty( $_POST['product_id'] ) ? intval( $_POST['product_id'] ) : '';
+		$product_id = ! empty( $_POST['product_id'] ) ? absint( wp_unslash( $_POST['product_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- read-only public product data, see above.
+		$product    = $product_id ? wc_get_product( $product_id ) : false;
 
-		if( ! wp_verify_nonce( $nonce, 'wcpcsu_quick_view_' . $product_id ) ) {
+		// Only products whose page a visitor could open: published, not a variation, not password protected.
+		// Catalog visibility isn't checked: carousels show "hidden" products too, and their page is public.
+		if ( ! $product || 'product' !== get_post_type( $product_id ) || 'publish' !== $product->get_status() || post_password_required( $product_id ) ) {
 			wp_send_json_error();
 		}
 
-		if ( empty( $product_id ) ) {
-			wp_send_json_error();
-		}
-
-		$product = wc_get_product( $product_id );
-		if ( ! $product ) {
-			return;
-		}
-
-		$wpcsu_img = wp_get_attachment_image_url( get_post_thumbnail_id( $product_id ), 'large' );
+		// The modal shows the image at most 300px wide (swmodal.css), so let srcset pick a small file.
+		$wpcsu_img = wp_get_attachment_image( get_post_thumbnail_id( $product_id ), 'large', false, array(
+			'alt'      => get_the_title( $product_id ),
+			'sizes'    => '300px',
+			'decoding' => 'async',
+		) );
 
 		ob_start();
 		?>
@@ -553,7 +749,7 @@ class WCPCSU_Shortcode {
 			<h2 class='wpcu-modal__product-title'><?php echo esc_html( get_the_title( $product_id ) );?></h2>
 			<?php if ( ! empty( $wpcsu_img ) ) { ?>
 			<div class='wpcu-modal__product-image'>
-				<img src="<?php echo esc_url( $wpcsu_img ); ?>" alt="<?php echo esc_attr( get_the_title( $product_id ) );?>">
+				<?php echo $wpcsu_img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup from wp_get_attachment_image(). ?>
 			</div>
 			<?php } ?>
 			<div class='wpcu-modal__product-description'>

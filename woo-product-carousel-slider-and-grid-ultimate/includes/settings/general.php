@@ -11,7 +11,7 @@ $h_title_show               = ! empty( $h_title_show ) ? $h_title_show : 'no';
 $display_full_title         = ! empty( $display_full_title ) ? $display_full_title : 'yes';
 $ribbon                     = ! empty( $ribbon ) ? $ribbon : 'discount';
 $header_position            = ! empty( $header_position ) ? $header_position : 'middle';
-$total_products_label       = ( ! empty( $layout ) && 'grid' == $layout ) ? __( 'Products Per Page','woocommerce-product-carousel-slider-and-grid-ultimate' ) : __( 'Total Products to Display','woocommerce-product-carousel-slider-and-grid-ultimate' );
+$total_products_label       = in_array( $layout, array( 'grid', 'list' ), true ) ? __( 'Products Per Page','woocommerce-product-carousel-slider-and-grid-ultimate' ) : __( 'Total Products to Display','woocommerce-product-carousel-slider-and-grid-ultimate' );
 $theme                      = ! empty( $theme ) ? $theme : 'theme_1';
 $display_sale_ribbon        = ! empty( $display_sale_ribbon ) ? $display_sale_ribbon : 'no';
 $sale_ribbon_position       = ! empty( $sale_ribbon_position ) ? $sale_ribbon_position : 'top_left';
@@ -31,32 +31,46 @@ $discount_ribbon_position   = ! empty( $discount_ribbon_position ) ? $discount_r
 					<label for="lcsp_slider_title"><?php esc_html_e( 'Layout', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
 				</div>
 				<div class="cmb-td">
+					<?php
+					// One tile per layout. data-tab: the settings tab the layout uses (wcpcs-admin.js).
+					$layout_tiles = array(
+						'carousel' => array( 'label' => __( 'Carousel', 'woocommerce-product-carousel-slider-and-grid-ultimate' ), 'img' => 'carousel.jpg', 'tab' => 'carousel' ),
+						'grid'     => array( 'label' => __( 'Grid', 'woocommerce-product-carousel-slider-and-grid-ultimate' ), 'img' => 'grid.jpg', 'tab' => 'grid' ),
+						'list'     => array( 'label' => __( 'List', 'woocommerce-product-carousel-slider-and-grid-ultimate' ), 'img' => 'list.svg', 'tab' => 'grid' ),
+						'ticker'   => array( 'label' => __( 'Ticker', 'woocommerce-product-carousel-slider-and-grid-ultimate' ), 'img' => 'ticker.svg', 'tab' => 'carousel' ),
+					);
+					$pro_layout_tiles = array(
+						'thumbnails' => array( 'label' => __( 'Thumbnails', 'woocommerce-product-carousel-slider-and-grid-ultimate' ), 'img' => 'thumbnails.svg' ),
+						'masonry'    => array( 'label' => __( 'Masonry', 'woocommerce-product-carousel-slider-and-grid-ultimate' ), 'img' => 'masonry.svg' ),
+						'tabbed'     => array( 'label' => __( 'Tabbed', 'woocommerce-product-carousel-slider-and-grid-ultimate' ), 'img' => 'tabbed.svg' ),
+					);
+					?>
 					<div class="cmd-switch">
-						<div class="cmd-switch-carousel <?php echo ( 'carousel' == $layout ) ? 'active' : ''; ?>">
-							<div class="cmd-switch-item cmd-switch-carousel-img" data-value="carousel">
+						<?php foreach ( $layout_tiles as $tile_layout => $tile ) { ?>
+						<div class="cmd-switch-<?php echo esc_attr( $tile_layout ); ?> <?php echo ( $tile_layout == $layout ) ? 'active' : ''; ?>" data-layout="<?php echo esc_attr( $tile_layout ); ?>" data-tab="<?php echo esc_attr( $tile['tab'] ); ?>">
+							<div class="cmd-switch-item cmd-switch-<?php echo esc_attr( $tile_layout ); ?>-img" data-value="<?php echo esc_attr( $tile_layout ); ?>">
 								<span class="cmd-switch-item-icon">
 									<span class="cmd-switch-item-icon__wrapper">
-										<img class="svg_compile" src="<?php echo WCPCSU_URL .'assets/icons/square-check-solid.svg' ?>" >
+										<img class="svg_compile" src="<?php echo esc_url( WCPCSU_URL . 'assets/icons/square-check-solid.svg' ); ?>" >
 									</span>
 								</span>
-								<img src="<?php echo WCPCSU_URL .'admin/img/carousel.jpg' ?>" alt="carousel">
-								<input type="radio" name="wcpscu[layout]" class="wcpscu_radio_layout wcpscu_carousel_layout" value="carousel" <?php checked( $layout, 'carousel' ); ?>>
+								<img src="<?php echo esc_url( WCPCSU_URL . 'admin/img/' . $tile['img'] ); ?>" alt="<?php echo esc_attr( $tile_layout ); ?>">
+								<input type="radio" name="wcpscu[layout]" class="wcpscu_radio_layout wcpscu_<?php echo esc_attr( $tile_layout ); ?>_layout" value="<?php echo esc_attr( $tile_layout ); ?>" <?php checked( $layout, $tile_layout ); ?>>
 							</div>
-							<p><?php _e( 'Carousel', 'woocommerce-product-carousel-slider-and-grid-ultimate' );?></p>
+							<p><?php echo esc_html( $tile['label'] ); ?></p>
 						</div>
-						<div class="cmd-switch-grid <?php echo ( 'grid' == $layout ) ? 'active' : ''; ?>">
-							<div class=" cmd-switch-item cmd-switch-grid-img" data-value="grid">
-								<span class="cmd-switch-item-icon">
-									<span class="cmd-switch-item-icon__wrapper">
-										<img class="svg_compile" src="<?php echo WCPCSU_URL .'assets/icons/square-check-solid.svg' ?>" >
-									</span>
-								</span>
-								<img src="<?php echo WCPCSU_URL .'admin/img/grid.jpg' ?>" alt="grid">
-								<input type="radio" name="wcpscu[layout]" class="wcpscu_radio_layout wcpscu_grid_layout" value="grid" <?php checked( $layout, 'grid' ); ?>>
+						<?php } ?>
+						<?php foreach ( $pro_layout_tiles as $tile_layout => $tile ) { ?>
+						<div class="cmd-switch-pro" title="<?php esc_attr_e( 'Available in the Pro version', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">
+							<div class="cmd-switch-item">
+								<img src="<?php echo esc_url( WCPCSU_URL . 'admin/img/' . $tile['img'] ); ?>" alt="<?php echo esc_attr( $tile_layout ); ?>">
+								<a class="cmd-switch-pro-badge" href="https://wpwax.com/product/woocommerce-product-carousel-slider-grid-ultimate-pro" target="_blank"><?php esc_html_e( 'Pro', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></a>
 							</div>
-							<p><?php esc_html_e( 'Grid', 'woocommerce-product-carousel-slider-and-grid-ultimate' );?></p>
+							<p><?php echo esc_html( $tile['label'] ); ?></p>
 						</div>
+						<?php } ?>
 					</div>
+					<p class="cmb2-metabox-description"><?php esc_html_e( 'Ticker: a row that scrolls at a constant speed (Carousel Settings). List: one product per row, image beside the details (Grid Settings).', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></p>
 				</div>
 			</div>
 			<!--Select theme-->
@@ -207,6 +221,16 @@ $discount_ribbon_position   = ! empty( $discount_ribbon_position ) ? $discount_r
 								<?php if( ! empty( $products_type ) ) { checked('featured', $products_type ); } ?>> <label
 								for="wcpscu_products_type3"><?php esc_html_e('Featured Products', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
 						</li>
+						<li><input type="radio" class="cmb2-option" name="wcpscu[products_type]"
+								id="wcpscu_products_type_handpicked" value="handpicked"
+								<?php if( ! empty( $products_type ) ) { checked( 'handpicked', $products_type ); } ?>> <label
+								for="wcpscu_products_type_handpicked"><?php esc_html_e('Handpicked Products', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
+						<li><input type="radio" class="cmb2-option" name="wcpscu[products_type]"
+								id="wcpscu_products_type_related" value="related"
+								<?php if( ! empty( $products_type ) ) { checked( 'related', $products_type ); } ?>> <label
+								for="wcpscu_products_type_related"><?php esc_html_e('Related Products', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
 					</ul>
 					<!-- <p class="cmb2-metabox-description">
 						<?php esc_html_e('What type of products to display in the carousel slider', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?>
@@ -255,6 +279,179 @@ $discount_ribbon_position   = ! empty( $discount_ribbon_position ) ? $discount_r
 						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_products_type"
 								id="wcpscu_ds_products_type" value="productsbymonth"> <label
 								for="wcpscu_ds_products_type"><?php esc_html_e('Products by Month', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
+						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_products_type"
+								id="wcpscu_ds_products_type" value="upsells"> <label
+								for="wcpscu_ds_products_type"><?php esc_html_e('Upsells', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
+						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_products_type"
+								id="wcpscu_ds_products_type" value="cross_sells"> <label
+								for="wcpscu_ds_products_type"><?php esc_html_e('Cross-sells', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
+						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_products_type"
+								id="wcpscu_ds_products_type" value="recently_viewed"> <label
+								for="wcpscu_ds_products_type"><?php esc_html_e('Recently Viewed Products', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
+						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_products_type"
+								id="wcpscu_ds_products_type" value="by_attribute"> <label
+								for="wcpscu_ds_products_type"><?php esc_html_e('Products by Attribute', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
+						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_products_type"
+								id="wcpscu_ds_products_type" value="by_brand"> <label
+								for="wcpscu_ds_products_type"><?php esc_html_e('Products by Brand', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Handpicked products: search + sortable list (shown for the "handpicked" type) -->
+			<div class="cmb-row cmb-type-text wcpscu-products-type-depend" data-products-type="handpicked">
+				<div class="cmb-th">
+					<label for="wcpscu_handpicked_search"><?php esc_html_e( 'Handpicked Products', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<div class="wcpscu-handpicked">
+						<?php // No name attribute: the search box itself is never saved, only the list below. ?>
+						<select id="wcpscu_handpicked_search" class="wc-product-search" style="width: 100%;"
+							data-placeholder="<?php esc_attr_e( 'Search for a product by name or SKU…', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>"
+							data-action="woocommerce_json_search_products"
+							data-allow_clear="true"></select>
+						<ul class="wcpscu-handpicked__list" data-remove-label="<?php esc_attr_e( 'Remove', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">
+							<?php
+							foreach ( wcpcsu_parse_id_list( ! empty( $handpicked_products ) ? $handpicked_products : array() ) as $handpicked_id ) {
+								$handpicked_product = wc_get_product( $handpicked_id );
+								if ( ! $handpicked_product ) {
+									continue;
+								}
+								?>
+								<li class="wcpscu-handpicked__item">
+									<span class="dashicons dashicons-menu wcpscu-handpicked__handle" aria-hidden="true"></span>
+									<span class="wcpscu-handpicked__name"><?php echo esc_html( wp_strip_all_tags( $handpicked_product->get_formatted_name() ) ); ?></span>
+									<button type="button" class="wcpscu-handpicked__remove" aria-label="<?php esc_attr_e( 'Remove', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">&times;</button>
+									<input type="hidden" name="wcpscu[handpicked_products][]" value="<?php echo esc_attr( $handpicked_id ); ?>">
+								</li>
+							<?php } ?>
+						</ul>
+					</div>
+					<p class="cmb2-metabox-description"><?php esc_html_e( 'Add products, then drag them into the order they should appear in. All picked products are shown.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Related products fallback (shown for the "related" type) -->
+			<div class="cmb-row cmb-type-radio wcpscu-products-type-depend" data-products-type="related">
+				<div class="cmb-th">
+					<label for="wcpscu_related_fallback"><?php esc_html_e( 'When There Is No Current Product', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<ul class="cmb2-radio-list cmb2-list">
+						<li><input type="radio" class="cmb2-option" name="wcpscu[related_fallback]"
+								id="wcpscu_related_fallback" value="latest"
+								<?php if ( empty( $related_fallback ) || 'latest' == $related_fallback ) { echo 'checked'; } ?>>
+							<label for="wcpscu_related_fallback"><?php esc_html_e( 'Show latest products', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li><input type="radio" class="cmb2-option" name="wcpscu[related_fallback]"
+								id="wcpscu_related_fallback2" value="none"
+								<?php if ( ! empty( $related_fallback ) ) { checked( 'none', $related_fallback ); } ?>>
+							<label for="wcpscu_related_fallback2"><?php esc_html_e( 'Show nothing', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+					</ul>
+					<p class="cmb2-metabox-description"><?php esc_html_e( 'Related products follow the product being viewed. On other pages (home, shop, the live preview) this is shown instead.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Category filter tabs (not for handpicked / related: their products don't split by category) -->
+			<div class="cmb-row cmb-type-radio wcpscu-products-type-depend" data-products-type="latest older featured">
+				<div class="cmb-th">
+					<label for="wcpscu_filter_tabs1"><?php esc_html_e( 'Category Filter Tabs', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<ul class="cmb2-radio-list cmb2-list cmb2-radio-switch">
+						<li><input type="radio" class="cmb2-option cmb2-radio-switch1 wcpscu-filter-tabs" name="wcpscu[filter_tabs]"
+								id="wcpscu_filter_tabs1" value="yes"
+								<?php if ( ! empty( $filter_tabs ) ) { checked( 'yes', $filter_tabs ); } ?>>
+							<label for="wcpscu_filter_tabs1"><?php esc_html_e( 'Yes', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li><input type="radio" class="cmb2-option cmb2-radio-switch2 wcpscu-filter-tabs" name="wcpscu[filter_tabs]"
+								id="wcpscu_filter_tabs2" value="no"
+								<?php if ( empty( $filter_tabs ) || 'no' === $filter_tabs ) { echo 'checked'; } ?>>
+							<label for="wcpscu_filter_tabs2"><?php esc_html_e( 'No', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+					</ul>
+					<p class="cmb2-metabox-description"><?php esc_html_e( 'Shoppers switch between categories above the products, without reloading the page.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></p>
+				</div>
+			</div>
+
+			<div class="cmb-row cmb-type-text wcpscu-products-type-depend wcpscu-filter-tabs-depend" data-products-type="latest older featured">
+				<div class="cmb-th">
+					<label for="wcpscu_filter_categories_add"><?php esc_html_e( 'Tab Categories', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<div class="wcpscu-handpicked wcpscu-tab-categories">
+						<?php // No name attribute: only the list below is saved. ?>
+						<select id="wcpscu_filter_categories_add" style="width: 100%;">
+							<option value=""><?php esc_html_e( 'Add a category…', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></option>
+							<?php
+							$wcpscu_cat_terms = get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false ) );
+							if ( ! is_wp_error( $wcpscu_cat_terms ) ) {
+								// Indented by depth, parents before their children.
+								echo walk_category_dropdown_tree( $wcpscu_cat_terms, 0, array( 'value_field' => 'slug', 'selected' => '', 'show_count' => 0 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core walker, escapes names and values.
+							}
+							?>
+						</select>
+						<ul class="wcpscu-handpicked__list wcpscu-tab-categories__list" data-remove-label="<?php esc_attr_e( 'Remove', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">
+							<?php
+							foreach ( wcpcsu_parse_slug_list( ! empty( $filter_categories ) ? $filter_categories : array() ) as $wcpscu_cat_slug ) {
+								$wcpscu_cat = get_term_by( 'slug', $wcpscu_cat_slug, 'product_cat' );
+								if ( ! $wcpscu_cat ) {
+									continue;
+								}
+								?>
+								<li class="wcpscu-handpicked__item">
+									<span class="dashicons dashicons-menu wcpscu-handpicked__handle" aria-hidden="true"></span>
+									<span class="wcpscu-handpicked__name"><?php echo esc_html( $wcpscu_cat->name ); ?></span>
+									<button type="button" class="wcpscu-handpicked__remove" aria-label="<?php esc_attr_e( 'Remove', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">&times;</button>
+									<input type="hidden" name="wcpscu[filter_categories][]" value="<?php echo esc_attr( $wcpscu_cat->slug ); ?>">
+								</li>
+							<?php } ?>
+						</ul>
+					</div>
+					<p class="cmb2-metabox-description"><?php esc_html_e( 'Each category becomes a tab, in this order (drag to reorder). A tab shows the products of the Products Type above that are in that category or its subcategories.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></p>
+				</div>
+			</div>
+
+			<div class="cmb-row cmb-type-text wcpscu-products-type-depend wcpscu-filter-tabs-depend" data-products-type="latest older featured">
+				<div class="cmb-th">
+					<label for="wcpscu_filter_all_text"><?php esc_html_e( '"All" Tab Label', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<input type="text" class="cmb2-text-medium" name="wcpscu[filter_all_text]" id="wcpscu_filter_all_text"
+						value="<?php echo ! empty( $filter_all_text ) ? esc_attr( $filter_all_text ) : ''; ?>"
+						placeholder="<?php esc_attr_e( 'All', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">
+					<p class="cmb2-metabox-description"><?php esc_html_e( 'The first tab, active when the page loads. It shows the products of the Products Type above (up to "Total Products to Display"), from every category.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></p>
+				</div>
+			</div>
+
+			<!-- Pro-only filters: disabled teasers, named outside wcpscu[...] so they are never saved -->
+			<div class="cmb-row cmb-type-radio">
+				<div class="cmb-th">
+					<label><?php esc_html_e( 'More Filters', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<ul class="cmb2-radio-list-pro">
+						<p><?php esc_html_e( 'Following options available in', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?> <a
+								href="https://wpwax.com/product/woocommerce-product-carousel-slider-grid-ultimate-pro"
+								target="_blank"><?php esc_html_e( 'Pro Version', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></a>:</p>
+						<li><input disabled type="checkbox" class="cmb2-option" name="wcpscu_pro_filters[]" id="wcpscu_pro_filter_search" value="search">
+							<label for="wcpscu_pro_filter_search"><?php esc_html_e( 'Search Box (shoppers type a keyword, results update as they type)', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li><input disabled type="checkbox" class="cmb2-option" name="wcpscu_pro_filters[]" id="wcpscu_pro_filter_multi" value="multi">
+							<label for="wcpscu_pro_filter_multi"><?php esc_html_e( 'Multi-Select Tabs (switch on several categories at once)', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li><input disabled type="checkbox" class="cmb2-option" name="wcpscu_pro_filters[]" id="wcpscu_pro_filter_load_more" value="load_more">
+							<label for="wcpscu_pro_filter_load_more"><?php esc_html_e( 'Load More Button / Infinite Scroll', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li><input disabled type="checkbox" class="cmb2-option" name="wcpscu_pro_filters[]" id="wcpscu_pro_filter_numbers" value="numbers">
+							<label for="wcpscu_pro_filter_numbers"><?php esc_html_e( 'Prev/Next Buttons for Numbered Pagination', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
 						</li>
 					</ul>
 				</div>

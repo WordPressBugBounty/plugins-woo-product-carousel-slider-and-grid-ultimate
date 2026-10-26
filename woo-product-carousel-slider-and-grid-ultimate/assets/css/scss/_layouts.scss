@@ -1,0 +1,179 @@
+/*===========================
+ Layouts beyond carousel and grid
+ (imported after the themes, so the list overrides their card styles)
+===========================*/
+
+/* Ticker: one row scrolling at a constant speed, without Swiper (build/carousel.js, initTicker()).
+   Card width per breakpoint as in the carousel (see .wpcu-carousel:not(.swiper-initialized)). */
+.wpcu-ticker {
+    --wpcu-gap: 20px;
+    --wpcu-cols: var(--wpcu-cols-sm, 1);
+    overflow: hidden;
+
+    @media (min-width: 768px) {
+        --wpcu-gap: 30px;
+        --wpcu-cols: var(--wpcu-cols-md, 2);
+    }
+    @media (min-width: 992px) {
+        --wpcu-cols: var(--wpcu-cols-lg, 3);
+    }
+    @media (min-width: 1200px) {
+        --wpcu-cols: var(--wpcu-cols-xl, 4);
+    }
+
+    .wpcu-ticker__track {
+        display: flex;
+    }
+    .wpcu-ticker__track > .wpcu-product {
+        flex-shrink: 0;
+        width: calc((100% - (var(--wpcu-cols) - 1) * var(--wpcu-gap)) / var(--wpcu-cols));
+        margin-right: var(--wpcu-gap);
+    }
+
+    /* Distance (one set of cards) and duration are set by initTicker(). */
+    &.wpcu-ticker--running .wpcu-ticker__track {
+        animation: wpcuTicker var(--wpcu-tickerDuration, 20s) linear infinite;
+        will-change: transform;
+    }
+    /* Scroll direction "Left to Right": the same loop played backwards, still seamless. */
+    &.wpcu-ticker--reverse.wpcu-ticker--running .wpcu-ticker__track {
+        animation-direction: reverse;
+    }
+    &.wpcu-ticker--pause:hover,
+    &.wpcu-ticker--pause:focus-within {
+        .wpcu-ticker__track {
+            animation-play-state: paused;
+        }
+    }
+
+    /* No movement: the visitor scrolls the row by hand. */
+    @media (prefers-reduced-motion: reduce) {
+        overflow-x: auto;
+
+        &.wpcu-ticker--running .wpcu-ticker__track {
+            animation: none;
+        }
+    }
+}
+
+/* List: one card per row, image left (a third) and the rest right; stacked on phones.
+   A two-column grid, so it fits every theme's card markup:
+   - plain cards (themes 1-7, 15): the grid is .wpcu-product__content (image + details);
+   - cards with a body (themes 8, 9, 11-14): the grid is .wpcu-product--card__body (image, details, icons);
+   - theme 10 keeps its title in the body and price/rating in the footer: the content is the grid
+     and the body is flattened into it.
+   The image spans every row. The parts beside it go into the auto rows between two flexible empty
+   rows, so they are centred next to the image whatever their number; an empty ::before holds the
+   top row, so the first part doesn't land in it. */
+.wpcu-layout-list {
+    .wpcu-list > .wpcu-product {
+        flex: 0 0 100%;
+    }
+
+    .wpcu-product {
+        .wpcu-product__content,
+        .wpcu-product--card__body {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+            grid-template-rows: minmax(0, 1fr) repeat(5, auto) minmax(0, 1fr);
+            column-gap: 30px;
+
+            &::before {
+                content: "";
+                grid-column: 2;
+                grid-row: 1;
+            }
+        }
+        .wpcu-product__img {
+            grid-column: 1;
+            grid-row: 1 / -1;
+            align-self: center;
+            margin-bottom: 0;
+        }
+        .wpcu-product__content > :not(.wpcu-product__img),
+        .wpcu-product--card__body > :not(.wpcu-product__img) {
+            grid-column: 2;
+            justify-self: start;
+            min-width: 0;
+            max-width: 100%;
+            text-align: left;
+        }
+
+        .wpcu-product__details {
+            align-items: flex-start;
+            text-align: left;
+        }
+        .wpcu-product__title {
+            text-align: left;
+        }
+        .wpcu-product__price,
+        .wpcu-product__rating {
+            justify-content: flex-start;
+        }
+        // Icon rows below the details (themes 8, 12, 14) are full width and centred in the card.
+        .wpcu-product--card__body > .wpcu-product__action-icons {
+            width: auto;
+            justify-content: flex-start;
+        }
+        // Rows that spread price and rating across a narrow card keep them together here.
+        .wpcu-d-flex,
+        .wpcu-product--card__footer {
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 6px 15px;
+        }
+    }
+
+    // Cards with a body: the body is the row.
+    .wpcu-product--card .wpcu-product__content {
+        display: block;
+
+        &::before {
+            content: none;
+        }
+    }
+    @media (max-width: 575px) {
+        .wpcu-product {
+            .wpcu-product__content,
+            .wpcu-product--card__body {
+                display: block;
+            }
+            .wpcu-product__img {
+                margin-bottom: 20px;
+            }
+        }
+    }
+}
+
+// Theme 10: title (in the body) and price/rating (in the footer) beside the image.
+.wpcu-layout-list.wpcu-theme_10 {
+    .wpcu-product--card .wpcu-product__content {
+        display: grid;
+
+        &::before {
+            content: "";
+        }
+    }
+    .wpcu-product--card__body {
+        display: contents;
+
+        &::before {
+            content: none;
+        }
+    }
+
+    @media (max-width: 575px) {
+        .wpcu-product--card .wpcu-product__content {
+            display: block;
+        }
+    }
+}
+// Theme 15: the details panel normally slides over the image; here it sits beside it.
+.wpcu-layout-list.wpcu-theme_15 {
+    .wpcu-product__content {
+        padding-bottom: 0 !important; // set inline by themeTweaks() for the sliding panel
+    }
+    .wpcu-product__details {
+        position: static;
+    }
+}

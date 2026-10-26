@@ -71,6 +71,17 @@
     color: var(--wpcu-pagActiveColor) !important;
 }
 
+/* Ajax-number pagination: the page buttons are <button> in the route response and <a> on the page. */
+.wpcu-pagination--ajax .page-numbers {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.wpcu-pagination--ajax button.page-numbers {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
 /* Carousel bullets pagination */
 .wpcu-carousel-pagination {
     margin-top: 30px;

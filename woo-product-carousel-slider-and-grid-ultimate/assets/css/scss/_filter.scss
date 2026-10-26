@@ -1,0 +1,95 @@
+/* Category filter tabs above a carousel/grid.
+   Selectors use two classes so the theme's own `button` styles (background, uppercase, shadows) don't win. */
+.wpcu-filter {
+    --wpcu-filterColor: #363940;
+    --wpcu-filterBorder: #{$borderColor};
+    --wpcu-filterActiveBg: #{$primary};
+    --wpcu-filterActiveColor: #fff;
+    margin: 0 0 24px;
+    padding: 0 15px;
+
+    @include e(tabs) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    @include m(middle) {
+        .wpcu-filter__tabs {
+            justify-content: center;
+        }
+    }
+
+    @include m(right) {
+        .wpcu-filter__tabs {
+            justify-content: flex-end;
+        }
+    }
+
+    .wpcu-filter__tab {
+        margin: 0;
+        padding: 8px 18px;
+        border: 1px solid var(--wpcu-filterBorder);
+        border-radius: 999px;
+        background: transparent;
+        box-shadow: none;
+        color: var(--wpcu-filterColor);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.4;
+        text-transform: none;
+        letter-spacing: normal;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+        &:hover {
+            background: transparent;
+            border-color: var(--wpcu-filterActiveBg);
+            color: var(--wpcu-filterActiveBg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--wpcu-filterActiveBg);
+            outline-offset: 2px;
+        }
+    }
+
+    .wpcu-filter__tab--active,
+    .wpcu-filter__tab--active:hover {
+        background: var(--wpcu-filterActiveBg);
+        border-color: var(--wpcu-filterActiveBg);
+        color: var(--wpcu-filterActiveColor);
+    }
+
+    // "No products found" for an empty category.
+    @include e(status) {
+        margin: 24px 0 0;
+        padding: 32px 15px;
+        border: 1px dashed var(--wpcu-filterBorder);
+        border-radius: 8px;
+        color: $textLight;
+        text-align: center;
+    }
+
+    @include m(loading) {
+        .wpcu-filter__tab {
+            cursor: progress;
+        }
+    }
+}
+
+// The theme's display rules must not show these while they are hidden.
+.wpcu-filter__status[hidden],
+.wpcu-filter + .wpcu-products[hidden],
+.wpcu-products .wpcu-pagination[hidden] {
+    display: none !important;
+}
+
+// While a category loads, keep the old cards visible but faded.
+.wpcu-products--loading {
+    opacity: 0.45;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}

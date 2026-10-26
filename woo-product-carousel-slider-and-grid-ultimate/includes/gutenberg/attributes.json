@@ -31,6 +31,26 @@
     "type":"string",
     "default": "12"
   },
+  "handpicked_products":{
+    "type":"string",
+    "default": ""
+  },
+  "related_fallback":{
+    "type":"string",
+    "default": "latest"
+  },
+  "filter_tabs":{
+    "type":"boolean",
+    "default": false
+  },
+  "filter_categories":{
+    "type":"string",
+    "default": ""
+  },
+  "filter_all_text":{
+    "type":"string",
+    "default": ""
+  },
   "display_sale_ribbon":{
     "type":"boolean",
     "default": false
@@ -91,6 +111,14 @@
     "type":"boolean",
     "default": true
   },
+  "stop_hover":{
+    "type":"boolean",
+    "default":false
+  },
+  "scrool_direction":{
+    "type":"string",
+    "default":"right_left"
+  },
   "repeat_product":{
     "type":"boolean",
     "default": true
@@ -146,6 +174,10 @@
   "grid_pagination":{
     "type":"boolean",
     "default": true
+  },
+  "grid_pagination_type":{
+    "type":"string",
+    "default": "normal"
   },
   "img_crop":{
     "type":"boolean",

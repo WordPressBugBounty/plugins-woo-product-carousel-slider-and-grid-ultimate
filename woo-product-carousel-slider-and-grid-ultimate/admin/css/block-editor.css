@@ -24,3 +24,40 @@
     display: flex;
 }
   
+/* Handpicked products control (block sidebar) */
+.wcpcsu-handpicked-block__results,
+.wcpcsu-handpicked-block__list {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.wcpcsu-handpicked-block__results {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+}
+
+.wcpcsu-handpicked-block__results li {
+    margin: 0;
+    padding: 4px 8px;
+}
+
+.wcpcsu-handpicked-block__item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0 0 4px;
+    padding: 2px 2px 2px 8px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+}
+
+.wcpcsu-handpicked-block__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

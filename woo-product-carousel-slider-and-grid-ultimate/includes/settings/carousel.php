@@ -10,6 +10,7 @@ $stop_hover          = ! empty( $stop_hover ) ? $stop_hover : 'false';
 $A_play              = ! empty( $A_play ) ? $A_play : 'yes';
 $pagination          = ! empty( $pagination ) ? $pagination : 'yes';
 $scrol_direction     = ! empty( $scrol_direction ) ? $scrol_direction : 'left';
+$scrool_direction    = ! empty( $scrool_direction ) ? $scrool_direction : 'right_left';
 $scrool              = ! empty( $scrool ) ? $scrool : 'false';
 $nav_show            = ! empty( $nav_show ) ? $nav_show : 'yes';
 $nav_position        = ! empty( $nav_position ) ? $nav_position : 'bottom-right';
@@ -22,7 +23,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 		<div id="cmb2-metabox" class="cmb2-metabox cmb-field-list">
 
 			<!--Auto Play-->
-			<div class="cmb-row cmb-type-radio">
+			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="lcsp_ap"><?php esc_html_e( 'Auto Play', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
 				</div>
@@ -43,7 +44,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 			</div>
 
 			<!--Repeat Product-->
-			<div class="cmb-row cmb-type-radio">
+			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="wcpscu_repeat_product"><?php esc_html_e( 'Repeat Product', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
 				</div>
@@ -69,7 +70,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 			</div>
 
 			<!--Stop on hover-->
-			<div class="cmb-row cmb-type-radio wpcu_auto_play_depend">
+			<div class="cmb-row cmb-type-radio wpcu_auto_play_depend wcpscu-ticker-show">
 				<div class="cmb-th">
 					<label for="lcsp_soh"><?php esc_html_e( 'Stop on Hover', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
 				</div>
@@ -157,12 +158,32 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 					<input type="text" class="cmb2-text-small" name="wcpscu[slide_speed]" id="wcpscu[slide_speed]"
 						value="<?php echo esc_attr( ! empty( $slide_speed ) ? intval( $slide_speed ) : 2000 ); ?>">
 					<p class="cmb2-metabox-description">
-						<?php esc_html_e( 'Here 1000 is equal to 1 second. So provide a speed accordingly', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
+						<span class="wcpscu-ticker-hide"><?php esc_html_e( 'Here 1000 is equal to 1 second. So provide a speed accordingly', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></span>
+						<span class="wcpscu-ticker-only"><?php esc_html_e( 'Ticker: the time one product takes to scroll past (1000 = 1 second). Higher is slower.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></span>
 					</p>
 				</div>
 			</div>
+			<!--Scroll direction (ticker only in Free; the same key and values as Pro's carousel setting)-->
+			<div class="cmb-row cmb-type-radio wcpscu-ticker-only">
+				<div class="cmb-th">
+					<label for="wcpscu_scrool_direction1"><?php esc_html_e( 'Scroll Direction', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<ul class="cmb2-radio-list cmb2-list">
+						<li>
+							<input type="radio" class="cmb2-option" name="wcpscu[scrool_direction]" id="wcpscu_scrool_direction1" value="right_left" <?php checked( 'right_left', $scrool_direction ); ?>>
+							<label for="wcpscu_scrool_direction1"><?php esc_html_e( 'Right to Left', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li>
+							<input type="radio" class="cmb2-option" name="wcpscu[scrool_direction]" id="wcpscu_scrool_direction2" value="left_right" <?php checked( 'left_right', $scrool_direction ); ?>>
+							<label for="wcpscu_scrool_direction2"><?php esc_html_e( 'Left to Right', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+					</ul>
+				</div>
+			</div>
+
 			<!--slide Timeout-->
-			<div class="cmb-row cmb-type-text-medium wpcu_auto_play_depend">
+			<div class="cmb-row cmb-type-text-medium wpcu_auto_play_depend wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="lcsp_ss">
 						<?php esc_html_e( 'Slide Timeout', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
@@ -178,7 +199,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 			</div>
 
 			<!-- Navigation show/hide -->
-			<div class="cmb-row cmb-type-radio">
+			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="wcpscu[c10_nav]">
 						<?php esc_html_e( 'Navigation Show', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
@@ -203,7 +224,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 					</ul>
 				</div>
 			</div>
-			<div class="cmb-row cmb-type-radio wpcu_navigation_depend">
+			<div class="cmb-row cmb-type-radio wpcu_navigation_depend wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="lcsp_ap"><?php esc_html_e( 'Navigation Position', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
 				</div>
@@ -220,7 +241,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 				</div>
 			</div>
 			<!-- Navigation color -->
-			<div class="cmb-row cmb-type-radio wpcu_navigation_depend">
+			<div class="cmb-row cmb-type-radio wpcu_navigation_depend wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="wcpscu[nav_arrow_color]">
 						<?php esc_html_e( 'Navigation Style', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
@@ -274,7 +295,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 				</div>
 			</div>
 			<!-- Navigation show/hide -->
-			<div class="cmb-row cmb-type-radio">
+			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="wcpscu[carousel_pagination]">
 						<?php esc_html_e( 'Pagination Show', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
@@ -300,7 +321,7 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 				</div>
 			</div>
 
-			<div class="cmb-row cmb-type-radio wpcu_carousel_pagination_depend">
+			<div class="cmb-row cmb-type-radio wpcu_carousel_pagination_depend wcpscu-ticker-hide">
 				<div class="cmb-th">
 					<label for="wcpscu[dots_color]">
 						<?php esc_html_e( 'Pagination Style', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>

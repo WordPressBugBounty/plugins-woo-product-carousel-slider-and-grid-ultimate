@@ -221,6 +221,172 @@ if ( ! function_exists('wpcsu_ribbon_badge') ) :
     }
 endif;
 
+if ( ! function_exists( 'wcpcsu_product_image_html' ) ) {
+	/**
+	 * Build the <img> tag for a product card.
+	 *
+	 * Always outputs width/height (so the browser reserves space and nothing jumps)
+	 * and native lazy loading for images that are not in the first visible row.
+	 *
+	 * @param int   $attachment_id Product thumbnail ID (0 when the product has none).
+	 * @param array $args {
+	 *     @type bool   $crop    Use the plugin's cropped size instead of WordPress' 'large' size.
+	 *     @type int    $width   Crop width.
+	 *     @type int    $height  Crop height.
+	 *     @type bool   $eager   Load immediately (first visible row) instead of lazily.
+	 *     @type string $alt     Alt text.
+	 *     @type array  $columns Visible columns per breakpoint: [ 'desktop' => 4, 'tablet' => 2, 'mobile' => 1 ].
+	 * }
+	 * @return string
+	 */
+	function wcpcsu_product_image_html( $attachment_id, $args = array() ) {
+		$args = wp_parse_args( $args, array(
+			'crop'    => true,
+			'width'   => 300,
+			'height'  => 300,
+			'eager'   => false,
+			'alt'     => '',
+			'columns' => array(),
+		) );
+
+		$loading = $args['eager'] ? 'eager' : 'lazy';
+
+		// How wide the card is per breakpoint, so the browser picks a large enough file from srcset.
+		$sizes = '';
+		if ( ! empty( $args['columns'] ) ) {
+			$columns = wp_parse_args( $args['columns'], array( 'desktop' => 4, 'tablet' => 2, 'mobile' => 1 ) );
+			$sizes   = sprintf(
+				'(max-width: 767px) %1$dvw, (max-width: 1199px) %2$dvw, %3$dvw',
+				max( 1, (int) ( 100 / max( 1, (int) $columns['mobile'] ) ) ),
+				max( 1, (int) ( 100 / max( 1, (int) $columns['tablet'] ) ) ),
+				max( 1, (int) ( 100 / max( 1, (int) $columns['desktop'] ) ) )
+			);
+
+			// Lazy images: let the browser use the real rendered width (sizes="auto"), with the
+			// column estimate as fallback; vw overestimates cards inside a narrow content area.
+			if ( ! $args['eager'] ) {
+				$sizes = 'auto, ' . $sizes;
+			}
+		}
+
+		// No thumbnail: WooCommerce placeholder, sized like the other cards.
+		if ( ! $attachment_id ) {
+			return sprintf(
+				'<img src="%s" alt="%s" width="%d" height="%d" loading="%s" decoding="async">',
+				esc_url( wc_placeholder_img_src( 'woocommerce_single' ) ),
+				esc_attr( $args['alt'] ),
+				absint( $args['width'] ),
+				absint( $args['height'] ),
+				esc_attr( $loading )
+			);
+		}
+
+		// Uncropped: WordPress' own markup gives srcset, sizes, width and height.
+		if ( ! $args['crop'] ) {
+			$attrs = array(
+				'alt'      => $args['alt'],
+				'loading'  => $loading,
+				'decoding' => 'async',
+			);
+
+			if ( $sizes ) {
+				$attrs['sizes'] = $sizes;
+			}
+
+			$html = wp_get_attachment_image( $attachment_id, 'large', false, $attrs );
+			if ( $html ) {
+				return $html;
+			}
+		}
+
+		// Cropped: the plugin's own resized file, plus a 2x version for high-density screens
+		// when the original is large enough.
+		$image = wc_pcsu_image_cropping( $attachment_id, $args['width'], $args['height'], true, 100 );
+		if ( empty( $image['url'] ) ) {
+			return '';
+		}
+
+		$image_width = absint( ! empty( $image['width'] ) ? $image['width'] : $args['width'] );
+		$srcset      = '';
+		$metadata    = wp_get_attachment_metadata( $attachment_id );
+		if ( ! empty( $metadata['width'] ) && ! empty( $metadata['height'] )
+			&& $metadata['width'] >= 2 * $args['width'] && $metadata['height'] >= 2 * $args['height'] ) {
+			$retina = wc_pcsu_image_cropping( $attachment_id, 2 * $args['width'], 2 * $args['height'], true, 100 );
+			if ( ! empty( $retina['url'] ) ) {
+				// Width descriptors + sizes: a card wider than the crop also gets the larger file.
+				$srcset = sprintf(
+					' srcset="%s %dw, %s %dw"%s',
+					esc_url( $image['url'] ),
+					$image_width,
+					esc_url( $retina['url'] ),
+					2 * $image_width,
+					$sizes ? ' sizes="' . esc_attr( $sizes ) . '"' : ''
+				);
+			}
+		}
+
+		return sprintf(
+			'<img src="%s"%s alt="%s" width="%d" height="%d" loading="%s" decoding="async">',
+			esc_url( $image['url'] ),
+			$srcset,
+			esc_attr( $args['alt'] ),
+			absint( ! empty( $image['width'] ) ? $image['width'] : $args['width'] ),
+			absint( ! empty( $image['height'] ) ? $image['height'] : $args['height'] ),
+			esc_attr( $loading )
+		);
+	}
+}
+
+if ( ! function_exists( 'wcpcsu_parse_id_list' ) ) {
+	/**
+	 * Product IDs from a saved list or a comma-separated attribute, in their given order.
+	 *
+	 * @param array|string $value IDs as an array or "12, 7, 30".
+	 * @return int[] Unique positive IDs.
+	 */
+	function wcpcsu_parse_id_list( $value ) {
+		$ids = is_array( $value ) ? $value : explode( ',', (string) $value );
+
+		return array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) );
+	}
+}
+
+if ( ! function_exists( 'wcpcsu_parse_slug_list' ) ) {
+	/**
+	 * Term slugs from a saved list or a comma-separated attribute, in their given order.
+	 *
+	 * @param array|string $value Slugs as an array or "shoes, bags".
+	 * @return string[] Unique non-empty slugs.
+	 */
+	function wcpcsu_parse_slug_list( $value ) {
+		$slugs = is_array( $value ) ? $value : explode( ',', (string) $value );
+
+		return array_values( array_unique( array_filter( array_map( 'sanitize_text_field', array_map( 'trim', $slugs ) ) ) ) );
+	}
+}
+
+if ( ! function_exists( 'wcpcsu_current_product_id' ) ) {
+	/**
+	 * The product that "related" carousels relate to: the single product being viewed.
+	 *
+	 * The global $product isn't used: after another product loop on the page it still
+	 * holds that loop's last product, which would make home/shop pages show unrelated
+	 * products instead of the fallback.
+	 *
+	 * @return int Product ID, or 0 when the page isn't a single product.
+	 */
+	function wcpcsu_current_product_id() {
+		$product_id = is_singular( 'product' ) ? get_queried_object_id() : 0;
+
+		/**
+		 * Filters the product used by "related" carousels (e.g. a preview product).
+		 *
+		 * @param int $product_id Product ID, or 0.
+		 */
+		return absint( apply_filters( 'wcpcsu_current_product_id', $product_id ) );
+	}
+}
+
 if ( ! function_exists( 'wcpcsu_sanitize_array' ) ) {
 	/**
 	 * It sanitize a multi-dimensional array

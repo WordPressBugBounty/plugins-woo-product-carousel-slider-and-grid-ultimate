@@ -1090,7 +1090,9 @@ ul.lcs_pro_features {
 
 .cmd-switch {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    gap: 10px;
     text-align: center;
 }
 
@@ -1168,9 +1170,8 @@ ul.lcs_pro_features {
 }
 
 
-.cmd-switch-carousel,
-.cmd-switch-grid {
-    max-width: 101px;
+.cmd-switch>div {
+    width: 101px;
 }
 
 .cmd-switch-item-icon {
@@ -1195,8 +1196,47 @@ ul.lcs_pro_features {
     margin: 0;
 }
 
-.cmd-switch-grid {
-    margin-left: 10px;
+.cmd-switch-item img {
+    max-height: 40px;
+}
+
+/* Pro layout tiles: shown, not selectable. */
+.cmd-switch>.cmd-switch-pro {
+    cursor: default;
+}
+
+.cmd-switch-pro .cmd-switch-item img {
+    opacity: 0.55;
+}
+
+.cmd-switch-pro p {
+    opacity: 0.7;
+}
+
+.cmd-switch-pro-badge {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    padding: 0 6px;
+    border-radius: 9px;
+    background: #834EFF;
+    color: #fff !important;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 17px;
+    text-decoration: none;
+}
+
+/* Rows a layout doesn't use (data-wcpscu-layout, set by settings.php and the layout tiles). */
+#lcsp-tabs-container[data-wcpscu-layout="ticker"] .wcpscu-ticker-hide,
+#lcsp-tabs-container[data-wcpscu-layout="list"] .wcpscu-list-hide,
+#lcsp-tabs-container:not([data-wcpscu-layout="ticker"]) .wcpscu-ticker-only {
+    display: none !important;
+}
+
+/* Stop on Hover pauses the ticker, which has no Auto Play setting to depend on. */
+#lcsp-tabs-container[data-wcpscu-layout="ticker"] .cmb-row.wcpscu-ticker-show {
+    display: block !important;
 }
 
 /* Switch input */
@@ -1725,4 +1765,170 @@ h1.wpcs-admin-header {
     .lcsp-tabs-menu li {
         flex: 100%;
     }
+}
+/* Live preview */
+.wcpcsu-preview {
+    padding: 4px 0 0;
+}
+
+.wcpcsu-preview__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.wcpcsu-preview__devices {
+    display: inline-flex;
+    padding: 3px;
+    background: #F4F5F7;
+    border-radius: 6px;
+}
+
+.wcpcsu-preview__device {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #5A5F7D;
+    font-size: 13px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.wcpcsu-preview__device .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.wcpcsu-preview__device:hover {
+    color: #834EFF;
+}
+
+.wcpcsu-preview__device:focus-visible {
+    outline: 2px solid #834EFF;
+    outline-offset: 1px;
+}
+
+.wcpcsu-preview__device.is-active {
+    background: #ffffff;
+    color: #834EFF;
+    box-shadow: 0 1px 3px rgba(39, 43, 65, .12);
+}
+
+.wcpcsu-preview__status {
+    color: #5A5F7D;
+    font-size: 13px;
+}
+
+.wcpcsu-preview__status.is-error {
+    color: #FF408C;
+}
+
+.wcpcsu-preview__stage {
+    overflow: hidden;
+    padding: 12px;
+    background: #F4F5F7;
+    border: 1px solid #E3E6EF;
+    border-radius: 6px;
+}
+
+.wcpcsu-preview__frame-wrap {
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 3px 5px rgba(173, 180, 210, .15);
+    transition: opacity .2s;
+}
+
+.wcpcsu-preview.is-loading .wcpcsu-preview__frame-wrap {
+    opacity: .6;
+}
+
+.wcpcsu-preview__frame {
+    display: block;
+    border: 0;
+    transform-origin: 0 0;
+}
+
+.wcpcsu-preview__note {
+    margin: 10px 0 0;
+    color: #A1A8C6;
+    font-size: 12px;
+}
+
+/* Handpicked products picker */
+.wcpscu-handpicked {
+    max-width: 520px;
+}
+
+.wcpscu-handpicked__list {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.wcpscu-handpicked__list:empty {
+    display: none;
+}
+
+.wcpscu-handpicked__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    padding: 7px 10px;
+    background: #ffffff;
+    border: 1px solid #E3E6EF;
+    border-radius: 4px;
+    color: #272B41;
+}
+
+.wcpscu-handpicked__item.ui-sortable-helper {
+    box-shadow: 0 3px 10px rgba(39, 43, 65, .15);
+}
+
+.wcpscu-handpicked__list .ui-sortable-placeholder {
+    visibility: visible !important;
+    height: 34px;
+    margin: 0 0 6px;
+    background: #F4F5F7;
+    border: 1px dashed #A1A8C6;
+    border-radius: 4px;
+}
+
+.wcpscu-handpicked__handle {
+    color: #A1A8C6;
+    cursor: move;
+}
+
+.wcpscu-handpicked__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wcpscu-handpicked__remove {
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: #A1A8C6;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.wcpscu-handpicked__remove:hover,
+.wcpscu-handpicked__remove:focus-visible {
+    color: #FF408C;
 }

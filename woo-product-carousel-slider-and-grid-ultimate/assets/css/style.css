@@ -66,14 +66,15 @@
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
-.wpcu-product .wpcu-product__img {
-  /* Image zoom on hover effect */
-}
 .wpcu-product .wpcu-product__img img {
   width: 100%;
+  /* Keep the aspect ratio when the width/height attributes are set. */
+  height: auto;
   -webkit-transition: 0.4s ease;
-  -o-transition: 0.4s ease;
   transition: 0.4s ease;
+}
+.wpcu-product .wpcu-product__img {
+  /* Image zoom on hover effect */
 }
 .wpcu-product .wpcu-product__img--hover-effect > a {
   display: block;
@@ -83,38 +84,6 @@
   -webkit-transform: scale(1.15);
       -ms-transform: scale(1.15);
           transform: scale(1.15);
-}
-
-/* Lazy load */
-.wpcu-lazy-load {
-  position: relative;
-}
-.wpcu-lazy-load:before {
-  content: "";
-  z-index: 9998;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  background: #f5f5f5;
-}
-.wpcu-lazy-load:after {
-  content: "";
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid #ff5500;
-  border-right-color: transparent;
-  -webkit-animation: wpcu-rotate 2s linear infinite;
-          animation: wpcu-rotate 2s linear infinite;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-      -ms-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
-  z-index: 9999;
 }
 
 /* Carousel nav style */
@@ -138,7 +107,6 @@
   margin: 0 5px;
   cursor: pointer;
   -webkit-transition: 0.3s ease;
-  -o-transition: 0.3s ease;
   transition: 0.3s ease;
   background: var(--wpcu-navBgColor) !important;
 }
@@ -295,6 +263,74 @@
   overflow: hidden;
 }
 
+/* WooCommerce's [add_to_cart] adds an inline border/padding; drop it from the first paint (not only after JS). */
+.wpcu-button p.woocommerce {
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+/* Cropped images: reserve the height from the crop size before the image loads. */
+.wpcu-products--img-ratio .wpcu-product__img img {
+  aspect-ratio: var(--wpcu-imgRatio);
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+/*
+ * Before Swiper starts, show the slides as one row with the same column count and
+ * gap Swiper will use (breakpoints match data-wpcu-responsive), so nothing jumps.
+ */
+.wpcu-carousel:not(.swiper-initialized) {
+  --wpcu-gap: 20px;
+  --wpcu-cols: var(--wpcu-cols-sm, 1);
+}
+.wpcu-carousel:not(.swiper-initialized) .swiper-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+.wpcu-carousel:not(.swiper-initialized) .swiper-slide {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  width: calc((100% - (var(--wpcu-cols, 1) - 1) * var(--wpcu-gap)) / var(--wpcu-cols, 1));
+  margin-right: var(--wpcu-gap);
+}
+@media (min-width: 768px) {
+  .wpcu-carousel:not(.swiper-initialized) {
+    --wpcu-gap: 30px;
+    --wpcu-cols: var(--wpcu-cols-md, 2);
+  }
+}
+@media (min-width: 992px) {
+  .wpcu-carousel:not(.swiper-initialized) {
+    --wpcu-cols: var(--wpcu-cols-lg, 3);
+  }
+}
+@media (min-width: 1200px) {
+  .wpcu-carousel:not(.swiper-initialized) {
+    --wpcu-cols: var(--wpcu-cols-xl, 4);
+  }
+}
+
+.wpcu-products-notice {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  border: 1px dashed #A1A8C6;
+  border-radius: 4px;
+  background: #F4F5F7;
+  color: #5A5F7D;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.wpcu-products-notice strong {
+  color: #272B41;
+}
+.wpcu-products-notice em {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
 /* wpcu grid */
 .wpcu-row {
   display: -webkit-box;
@@ -358,19 +394,16 @@
         -ms-flex: 0 0 100% !important;
             flex: 0 0 100% !important;
   }
-
   .wpcu-column-md-2 .wpcu-product {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 50%;
             flex: 0 0 50%;
   }
-
   .wpcu-column-md-3 .wpcu-product {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 33.33%;
             flex: 0 0 33.33%;
   }
-
   .wpcu-column-md-4 .wpcu-product {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 25%;
@@ -383,19 +416,16 @@
         -ms-flex: 0 0 100% !important;
             flex: 0 0 100% !important;
   }
-
   .wpcu-column-sm-2 .wpcu-product {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 50%;
             flex: 0 0 50%;
   }
-
   .wpcu-column-sm-3 .wpcu-product {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 33.33%;
             flex: 0 0 33.33%;
   }
-
   .wpcu-column-sm-4 .wpcu-product {
     -webkit-box-flex: 0;
         -ms-flex: 0 0 25%;
@@ -421,6 +451,27 @@
   100% {
     -webkit-transform: rotate(360deg);
             transform: rotate(360deg);
+  }
+}
+/* Ticker: moves the row by one set of cards (--wpcu-tickerDistance, set by build/carousel.js). */
+@-webkit-keyframes wpcuTicker {
+  0% {
+    -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+  }
+  100% {
+    -webkit-transform: translate3d(var(--wpcu-tickerDistance, 0), 0, 0);
+            transform: translate3d(var(--wpcu-tickerDistance, 0), 0, 0);
+  }
+}
+@keyframes wpcuTicker {
+  0% {
+    -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+  }
+  100% {
+    -webkit-transform: translate3d(var(--wpcu-tickerDistance, 0), 0, 0);
+            transform: translate3d(var(--wpcu-tickerDistance, 0), 0, 0);
   }
 }
 /*
@@ -455,7 +506,6 @@
           justify-content: center;
   text-decoration: none;
   -webkit-transition: 0.3s ease;
-  -o-transition: 0.3s ease;
   transition: 0.3s ease;
   border: 1px solid transparent !important;
   line-height: unset;
@@ -592,7 +642,6 @@
   color: var(--wpcu-productTitleColor) !important;
   letter-spacing: normal;
   -webkit-transition: 0.3s ease;
-  -o-transition: 0.3s ease;
   transition: 0.3s ease;
 }
 .wpcu-product__title a:hover {
@@ -737,6 +786,96 @@
           transform: translate(-50%, -50%);
 }
 
+/* Category filter tabs above a carousel/grid.
+   Selectors use two classes so the theme's own `button` styles (background, uppercase, shadows) don't win. */
+.wpcu-filter {
+  --wpcu-filterColor: #363940;
+  --wpcu-filterBorder: #e4e4ed;
+  --wpcu-filterActiveBg: #ff5500;
+  --wpcu-filterActiveColor: #fff;
+  margin: 0 0 24px;
+  padding: 0 15px;
+}
+.wpcu-filter__tabs {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 8px;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+.wpcu-filter--middle .wpcu-filter__tabs {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+.wpcu-filter--right .wpcu-filter__tabs {
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+.wpcu-filter .wpcu-filter__tab {
+  margin: 0;
+  padding: 8px 18px;
+  border: 1px solid var(--wpcu-filterBorder);
+  border-radius: 999px;
+  background: transparent;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  color: var(--wpcu-filterColor);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  -webkit-transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.wpcu-filter .wpcu-filter__tab:hover {
+  background: transparent;
+  border-color: var(--wpcu-filterActiveBg);
+  color: var(--wpcu-filterActiveBg);
+}
+.wpcu-filter .wpcu-filter__tab:focus-visible {
+  outline: 2px solid var(--wpcu-filterActiveBg);
+  outline-offset: 2px;
+}
+.wpcu-filter .wpcu-filter__tab--active,
+.wpcu-filter .wpcu-filter__tab--active:hover {
+  background: var(--wpcu-filterActiveBg);
+  border-color: var(--wpcu-filterActiveBg);
+  color: var(--wpcu-filterActiveColor);
+}
+.wpcu-filter__status {
+  margin: 24px 0 0;
+  padding: 32px 15px;
+  border: 1px dashed var(--wpcu-filterBorder);
+  border-radius: 8px;
+  color: #9192a3;
+  text-align: center;
+}
+.wpcu-filter--loading .wpcu-filter__tab {
+  cursor: progress;
+}
+
+.wpcu-filter__status[hidden],
+.wpcu-filter + .wpcu-products[hidden],
+.wpcu-products .wpcu-pagination[hidden] {
+  display: none !important;
+}
+
+.wpcu-products--loading {
+  opacity: 0.45;
+  pointer-events: none;
+  -webkit-transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+
 /*===========================
  Utility Classes
 ===========================*/
@@ -771,6 +910,25 @@
 /*===========================
  Modal Styles
 ===========================*/
+/*
+ * The modal shell is printed with the carousel, but swmodal.css loads in the footer.
+ * Keep it out of the page flow from the first paint so it causes no layout shift.
+ */
+.wpcu-modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.wpcu-modal__dialog {
+  opacity: 0;
+  visibility: hidden;
+}
+
 /* Modal Style */
 .wpcu-modal.wpcu-modal--loading .wpcu-modal__content {
   position: relative;
@@ -849,6 +1007,7 @@
 
 .wpcu-modal .wpcu-modal__product-image img {
   max-width: 300px;
+  height: auto;
 }
 
 .wpcu-modal .wpcu-modal__product-price {
@@ -970,7 +1129,6 @@
   min-height: 34px;
   border-radius: 3px;
   -webkit-transition: 0.3s ease;
-  -o-transition: 0.3s ease;
   transition: 0.3s ease;
 }
 .wpcu-pagination .pagination .nav-links .page-numbers:before, .wpcu-pagination .pagination .nav-links .page-numbers:after {
@@ -998,6 +1156,18 @@
   background: var(--wpcu-pagActiveBgColor) !important;
   border-color: var(--wpcu-pagActiveBorderColor) !important;
   color: var(--wpcu-pagActiveColor) !important;
+}
+
+/* Ajax-number pagination: the page buttons are <button> in the route response and <a> on the page. */
+.wpcu-pagination--ajax .page-numbers {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.wpcu-pagination--ajax button.page-numbers {
+  -moz-appearance: none;
+       appearance: none;
+  -webkit-appearance: none;
 }
 
 /* Carousel bullets pagination */
@@ -1042,7 +1212,6 @@
   opacity: 0;
   pointer-events: none;
   -webkit-transition: 0.3s ease;
-  -o-transition: 0.3s ease;
   transition: 0.3s ease;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
@@ -1081,7 +1250,6 @@
 }
 .wpcu-theme_2 .wpcu-product__img .wpcu-product__cover-content--middle {
   -webkit-transition: 0.3s ease;
-  -o-transition: 0.3s ease;
   transition: 0.3s ease;
   opacity: 0;
   visibility: hidden;
@@ -1131,7 +1299,6 @@
 }
 .wpcu-theme_3 .wpcu-product__img .wpcu-product__cover-content--middle {
   -webkit-transition: 0.3s ease;
-  -o-transition: 0.3s ease;
   transition: 0.3s ease;
   opacity: 0;
   visibility: hidden;
@@ -1160,4 +1327,187 @@
   opacity: 1;
   visibility: visible;
   pointer-events: all;
+}
+
+/*===========================
+ Layouts beyond carousel and grid
+ (imported after the themes, so the list overrides their card styles)
+===========================*/
+/* Ticker: one row scrolling at a constant speed, without Swiper (build/carousel.js, initTicker()).
+   Card width per breakpoint as in the carousel (see .wpcu-carousel:not(.swiper-initialized)). */
+.wpcu-ticker {
+  --wpcu-gap: 20px;
+  --wpcu-cols: var(--wpcu-cols-sm, 1);
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .wpcu-ticker {
+    --wpcu-gap: 30px;
+    --wpcu-cols: var(--wpcu-cols-md, 2);
+  }
+}
+@media (min-width: 992px) {
+  .wpcu-ticker {
+    --wpcu-cols: var(--wpcu-cols-lg, 3);
+  }
+}
+@media (min-width: 1200px) {
+  .wpcu-ticker {
+    --wpcu-cols: var(--wpcu-cols-xl, 4);
+  }
+}
+.wpcu-ticker .wpcu-ticker__track {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+.wpcu-ticker .wpcu-ticker__track > .wpcu-product {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  width: calc((100% - (var(--wpcu-cols) - 1) * var(--wpcu-gap)) / var(--wpcu-cols));
+  margin-right: var(--wpcu-gap);
+}
+.wpcu-ticker {
+  /* Distance (one set of cards) and duration are set by initTicker(). */
+}
+.wpcu-ticker.wpcu-ticker--running .wpcu-ticker__track {
+  -webkit-animation: wpcuTicker var(--wpcu-tickerDuration, 20s) linear infinite;
+          animation: wpcuTicker var(--wpcu-tickerDuration, 20s) linear infinite;
+  will-change: transform;
+}
+.wpcu-ticker {
+  /* Scroll direction "Left to Right": the same loop played backwards, still seamless. */
+}
+.wpcu-ticker.wpcu-ticker--reverse.wpcu-ticker--running .wpcu-ticker__track {
+  animation-direction: reverse;
+}
+.wpcu-ticker.wpcu-ticker--pause:hover .wpcu-ticker__track, .wpcu-ticker.wpcu-ticker--pause:focus-within .wpcu-ticker__track {
+  -webkit-animation-play-state: paused;
+          animation-play-state: paused;
+}
+.wpcu-ticker {
+  /* No movement: the visitor scrolls the row by hand. */
+}
+@media (prefers-reduced-motion: reduce) {
+  .wpcu-ticker {
+    overflow-x: auto;
+  }
+  .wpcu-ticker.wpcu-ticker--running .wpcu-ticker__track {
+    -webkit-animation: none;
+            animation: none;
+  }
+}
+
+/* List: one card per row, image left (a third) and the rest right; stacked on phones.
+   A two-column grid, so it fits every theme's card markup:
+   - plain cards (themes 1-7, 15): the grid is .wpcu-product__content (image + details);
+   - cards with a body (themes 8, 9, 11-14): the grid is .wpcu-product--card__body (image, details, icons);
+   - theme 10 keeps its title in the body and price/rating in the footer: the content is the grid
+     and the body is flattened into it.
+   The image spans every row. The parts beside it go into the auto rows between two flexible empty
+   rows, so they are centred next to the image whatever their number; an empty ::before holds the
+   top row, so the first part doesn't land in it. */
+.wpcu-layout-list .wpcu-list > .wpcu-product {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 100%;
+          flex: 0 0 100%;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product__content,
+.wpcu-layout-list .wpcu-product .wpcu-product--card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-rows: minmax(0, 1fr) repeat(5, auto) minmax(0, 1fr);
+  -webkit-column-gap: 30px;
+     -moz-column-gap: 30px;
+          column-gap: 30px;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product__content::before,
+.wpcu-layout-list .wpcu-product .wpcu-product--card__body::before {
+  content: "";
+  grid-column: 2;
+  grid-row: 1;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product__img {
+  grid-column: 1;
+  grid-row: 1/-1;
+  align-self: center;
+  margin-bottom: 0;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product__content > :not(.wpcu-product__img),
+.wpcu-layout-list .wpcu-product .wpcu-product--card__body > :not(.wpcu-product__img) {
+  grid-column: 2;
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product__details {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  text-align: left;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product__title {
+  text-align: left;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product__price,
+.wpcu-layout-list .wpcu-product .wpcu-product__rating {
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+.wpcu-layout-list .wpcu-product .wpcu-product--card__body > .wpcu-product__action-icons {
+  width: auto;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+.wpcu-layout-list .wpcu-product .wpcu-d-flex,
+.wpcu-layout-list .wpcu-product .wpcu-product--card__footer {
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 6px 15px;
+}
+.wpcu-layout-list .wpcu-product--card .wpcu-product__content {
+  display: block;
+}
+.wpcu-layout-list .wpcu-product--card .wpcu-product__content::before {
+  content: none;
+}
+@media (max-width: 575px) {
+  .wpcu-layout-list .wpcu-product .wpcu-product__content,
+  .wpcu-layout-list .wpcu-product .wpcu-product--card__body {
+    display: block;
+  }
+  .wpcu-layout-list .wpcu-product .wpcu-product__img {
+    margin-bottom: 20px;
+  }
+}
+
+.wpcu-layout-list.wpcu-theme_10 .wpcu-product--card .wpcu-product__content {
+  display: grid;
+}
+.wpcu-layout-list.wpcu-theme_10 .wpcu-product--card .wpcu-product__content::before {
+  content: "";
+}
+.wpcu-layout-list.wpcu-theme_10 .wpcu-product--card__body {
+  display: contents;
+}
+.wpcu-layout-list.wpcu-theme_10 .wpcu-product--card__body::before {
+  content: none;
+}
+@media (max-width: 575px) {
+  .wpcu-layout-list.wpcu-theme_10 .wpcu-product--card .wpcu-product__content {
+    display: block;
+  }
+}
+
+.wpcu-layout-list.wpcu-theme_15 .wpcu-product__content {
+  padding-bottom: 0 !important;
+}
+.wpcu-layout-list.wpcu-theme_15 .wpcu-product__details {
+  position: static;
 }

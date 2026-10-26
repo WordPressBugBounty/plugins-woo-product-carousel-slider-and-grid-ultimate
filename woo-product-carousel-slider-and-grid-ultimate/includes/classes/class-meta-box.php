@@ -44,6 +44,52 @@ class WCPCSU_Meta_Box {
 			WCPCSU_CUSTOM_POST_TYPE,
 			'normal'
 		);
+
+		add_meta_box(
+			'wcpcsu_preview_meta_box',
+			__( 'Live Preview', 'woocommerce-product-carousel-slider-and-grid-ultimate' ),
+			array( $this, 'show_preview_meta_box' ),
+			WCPCSU_CUSTOM_POST_TYPE,
+			'normal',
+			'high'
+		);
+	}
+
+	/**
+	 * Live preview panel. admin/js/wcpcsu-preview.js renders the unsaved form
+	 * values into the iframe through the WCPCSU_Preview REST endpoint.
+	 */
+	public function show_preview_meta_box() {
+		// Viewport widths match the breakpoints in data-wpcu-responsive and style.css (768/992/1200).
+		$devices = array(
+			'desktop' => array( 1280, 'dashicons-desktop', __( 'Desktop', 'woocommerce-product-carousel-slider-and-grid-ultimate' ) ),
+			'laptop'  => array( 1024, 'dashicons-laptop', __( 'Laptop', 'woocommerce-product-carousel-slider-and-grid-ultimate' ) ),
+			'tablet'  => array( 768, 'dashicons-tablet', __( 'Tablet', 'woocommerce-product-carousel-slider-and-grid-ultimate' ) ),
+			'mobile'  => array( 375, 'dashicons-smartphone', __( 'Mobile', 'woocommerce-product-carousel-slider-and-grid-ultimate' ) ),
+		);
+		?>
+		<div class="wcpcsu-preview">
+			<div class="wcpcsu-preview__toolbar">
+				<div class="wcpcsu-preview__devices" role="group" aria-label="<?php esc_attr_e( 'Preview device', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">
+					<?php foreach ( $devices as $device => $info ) { ?>
+						<button type="button" class="wcpcsu-preview__device<?php echo 'desktop' === $device ? ' is-active' : ''; ?>" data-width="<?php echo esc_attr( $info[0] ); ?>" aria-pressed="<?php echo 'desktop' === $device ? 'true' : 'false'; ?>">
+							<span class="dashicons <?php echo esc_attr( $info[1] ); ?>" aria-hidden="true"></span>
+							<?php echo esc_html( $info[2] ); ?>
+						</button>
+					<?php } ?>
+				</div>
+				<span class="wcpcsu-preview__status" aria-live="polite"></span>
+			</div>
+			<div class="wcpcsu-preview__stage">
+				<div class="wcpcsu-preview__frame-wrap">
+					<iframe class="wcpcsu-preview__frame" title="<?php esc_attr_e( 'Carousel preview', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>"></iframe>
+				</div>
+			</div>
+			<p class="wcpcsu-preview__note">
+				<?php esc_html_e( 'Shows your unsaved changes. Links and buttons are disabled here, and your theme\'s fonts and styles are not applied.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
+			</p>
+		</div>
+		<?php
 	}
 
 	public function show_meta_box( $post ) {

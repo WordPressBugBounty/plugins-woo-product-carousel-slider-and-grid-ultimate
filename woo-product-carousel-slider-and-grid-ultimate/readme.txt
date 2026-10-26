@@ -2,8 +2,8 @@
 Contributors: wpwax
 Tags: woocommerce carousel, woocommerce slider, woocommerce grid, woocommerce product slider, woocommerce product carousel, WooCommerce product display, WooCommerce product grid plugin, Dynamic product sliders, WooCommerce product carousel plugin, Customizable product sliders, Responsive WooCommerce carousel, WooCommerce product showcase
 Requires at least: 4.0
-Tested up to: 6.9
-Stable tag: 1.12.0
+Tested up to: 7.1
+Stable tag: 1.13.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -129,6 +129,32 @@ Post Grid and Carousel Ultimate plugin is very easy to use. Just follow the foll
 2. Copy the Shortcode from the first Shortcode tab. For example: [wcpcsu id="123"]
 3. Paste the Shortcode on any Page or Post where you would like to display the Grid/Carousel/slider.
 
+== Frequently Asked Questions ==
+
+= Can I change the products of a carousel in the shortcode? =
+
+Yes. Shortcode attributes override the carousel's saved settings, so one carousel can be reused with different products:
+
+`[wcpcsu id="123" products_type="related"]`
+
+`products_type` accepts: `latest`, `older`, `featured`, `handpicked`, `related`. More product types (on sale, best selling, top rated, upsells, cross-sells, recently viewed, by attribute, by brand and others) are available in the Pro version.
+
+Other useful attributes: `total_products="8"`, `layout="grid"`, `theme="theme_2"`.
+
+= How do I show handpicked products in my own order? =
+
+Choose "Handpicked Products" in the carousel settings, search the products and drag them into order. In a shortcode, list the product IDs in order:
+
+`[wcpcsu id="123" products_type="handpicked" handpicked_products="12,7,30"]`
+
+= How do related products work? =
+
+They show the products related to the product being viewed, so place the carousel on single product pages (for example in the product's short description, or with a theme template or hook):
+
+`[wcpcsu id="123" products_type="related"]`
+
+On other pages there is no current product. "When There Is No Current Product" decides what is shown there: `related_fallback="latest"` (latest products, the default) or `related_fallback="none"` (nothing; logged-in editors see a short note instead).
+
 == Screenshots ==
 1. Carousel Theme-1
 2. Carousel Theme-2
@@ -144,6 +170,29 @@ Post Grid and Carousel Ultimate plugin is very easy to use. Just follow the foll
 12. Backend: Style Settings
 
 == Changelog ==
+
+= 1.13.0 =
+* Add: New layouts: List (image beside the details) and Ticker (a row scrolling at a constant speed, with pause on hover and scroll direction), in the settings, block and Elementor
+* Add: Live preview on the carousel edit screen: every setting change updates the preview without saving, with Desktop / Laptop / Tablet / Mobile views
+* Add: Handpicked products: search products by name or SKU and drag them into the order they should appear in
+* Add: Related products of the product being viewed, with a choice of what to show on other pages (latest products or nothing)
+* Add: Where a related products carousel has nothing to show, logged-in editors see a short explanation instead of an empty space (visitors see nothing)
+* Add: Category filter tabs above a carousel or grid: shoppers switch categories without reloading the page; you choose the categories, their order and the "All" label (shortcode, block and Elementor)
+* Add: Grid pagination without page reload ("Ajax Numbers"), with a shortened page list for long lists (1 … 4 5 6 … 10)
+* Add: Filtered and paged views have their own link (e.g. `?wpcu_cat=shoes&wpcu_page=2`), so they can be shared
+* Add: Faster carousel engine: Swiper 11 bundled with only the modules in use (about 24 KB gzipped instead of 43 KB); the dots module loads only when dots are enabled
+* Add: Carousel scripts and styles load only on pages that show a carousel, in the footer with `defer`
+* Add: Lazy loading for product images after the first row, with responsive `srcset`/`sizes` and `width`/`height` attributes
+* Add: No layout shift while the page loads: card and image space is reserved before the carousel starts
+* Update: Frontend no longer needs jQuery; quick view rewritten in plain JavaScript
+* Update: Gutenberg block and Elementor previews use the same carousel script as the frontend
+* Update: Quick view also works on cached pages and on products loaded by the filter tabs
+* Fix: Gutenberg block preview broken in the block editor
+* Fix: "Image Resize & Crop" toggle of the Gutenberg block had no effect
+* Fix: Dots (pagination) option of the Elementor widget had no effect
+* Fix: Quick view modal briefly showing in the page while it loads
+* Add: WordPress 7.1 compatibility
+* Add: WooCommerce 11.2 compatibility
 
 = 1.12.0 =
 * Update: Unnecessary changes

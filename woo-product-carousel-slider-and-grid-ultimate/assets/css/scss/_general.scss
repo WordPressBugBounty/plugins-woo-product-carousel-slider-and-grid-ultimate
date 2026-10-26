@@ -13,6 +13,8 @@
     .wpcu-product__img{
         img {
             width: 100%;
+            /* Keep the aspect ratio when the width/height attributes are set. */
+            height: auto;
             transition: 0.4s ease;
         }
         /* Image zoom on hover effect */
@@ -27,37 +29,6 @@
                 }
             }
         }
-    }
-}
-
-/* Lazy load */
-.wpcu-lazy-load {
-    position: relative;
-
-    &:before {
-        content: "";
-        z-index: 9998;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        background: #f5f5f5;
-    }
-
-    &:after {
-        content: "";
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: 2px solid $primary;
-        border-right-color: transparent;
-        animation: wpcu-rotate 2s linear infinite;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 9999;
     }
 }
 
@@ -201,4 +172,63 @@
 /* Carousel Style */
 .wpcu-carousel{
     overflow: hidden;
+}
+
+/* WooCommerce's [add_to_cart] adds an inline border/padding; drop it from the first paint (not only after JS). */
+.wpcu-button p.woocommerce {
+    border: 0 !important;
+    padding: 0 !important;
+}
+
+/* Cropped images: reserve the height from the crop size before the image loads. */
+.wpcu-products--img-ratio .wpcu-product__img img {
+    aspect-ratio: var(--wpcu-imgRatio);
+    object-fit: cover;
+}
+
+/*
+ * Before Swiper starts, show the slides as one row with the same column count and
+ * gap Swiper will use (breakpoints match data-wpcu-responsive), so nothing jumps.
+ */
+.wpcu-carousel:not(.swiper-initialized) {
+    --wpcu-gap: 20px;
+    --wpcu-cols: var(--wpcu-cols-sm, 1);
+
+    .swiper-wrapper {
+        display: flex;
+    }
+    .swiper-slide {
+        flex-shrink: 0;
+        width: calc((100% - (var(--wpcu-cols, 1) - 1) * var(--wpcu-gap)) / var(--wpcu-cols, 1));
+        margin-right: var(--wpcu-gap);
+    }
+    @media (min-width: 768px) {
+        --wpcu-gap: 30px;
+        --wpcu-cols: var(--wpcu-cols-md, 2);
+    }
+    @media (min-width: 992px) {
+        --wpcu-cols: var(--wpcu-cols-lg, 3);
+    }
+    @media (min-width: 1200px) {
+        --wpcu-cols: var(--wpcu-cols-xl, 4);
+    }
+}
+// Note for editors where a "Related" carousel set to "Show nothing" has no current product.
+.wpcu-products-notice {
+    margin: 0 0 20px;
+    padding: 12px 16px;
+    border: 1px dashed #A1A8C6;
+    border-radius: 4px;
+    background: #F4F5F7;
+    color: #5A5F7D;
+    font-size: 14px;
+    line-height: 1.5;
+    strong {
+        color: #272B41;
+    }
+    em {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+    }
 }
