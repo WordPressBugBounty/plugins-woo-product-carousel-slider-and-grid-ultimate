@@ -16,6 +16,10 @@ $g_mobile        = ! empty( $g_mobile ) ? $g_mobile : '1';
 <div id="lcsp-tab-3" class="lcsp-tab-content">
 	<div class="cmb2-wrap form-table">
 		<div id="cmb2-metabox" class="cmb2-metabox cmb-field-list">
+			<div class="wcpscu-sections">
+			<section class="wcpscu-section" data-wcpscu-section="columns">
+			<h3 class="wcpscu-section__title"><?php esc_html_e( 'Columns', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></h3>
+
 
 			<!--Select Column for desktop-->
 			<div class="cmb-row cmb-type-radio wcpscu-list-hide">
@@ -61,6 +65,11 @@ $g_mobile        = ! empty( $g_mobile ) ? $g_mobile : '1';
 					</select>
 				</div>
 			</div>
+
+			</section>
+
+			<section class="wcpscu-section" data-wcpscu-section="pagination">
+			<h3 class="wcpscu-section__title"><?php esc_html_e( 'Pagination', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></h3>
 
 			<!--Pagination-->
 			<div class="cmb-row cmb-type-radio">
@@ -199,6 +208,8 @@ $g_mobile        = ! empty( $g_mobile ) ? $g_mobile : '1';
 					</div>
 				</div>
 			</div>
+			</section>
+			</div><!-- end wcpscu-sections -->
 		</div> <!-- end cmb2-metabox -->
 	</div> <!-- end cmb2-wrap -->
 </div> <!-- end lcsp-tab-2

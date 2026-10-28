@@ -20,6 +20,9 @@ jQuery(function ($) {
     var frame = panel.querySelector('.wcpcsu-preview__frame');
     var status = panel.querySelector('.wcpcsu-preview__status');
     var postIdField = document.getElementById('post_ID');
+    var pin = panel.querySelector('.wcpcsu-preview__pin');
+    var box = panel.closest('.postbox');
+    var pinQuery = window.matchMedia('(min-width: 783px) and (min-height: 700px)');
 
     var viewportWidth = 1280;
     var contentHeight = 300;
@@ -80,12 +83,17 @@ jQuery(function ($) {
     /**
      * Fit the iframe into the panel. The iframe keeps the device's real width
      * (so media queries and Swiper breakpoints match), and is scaled down when
-     * the panel is narrower.
+     * the panel is narrower. Pinned, it also fits in 30% of the window's height,
+     * so the settings below stay usable.
      */
     function layout() {
         var padding = parseFloat(getComputedStyle(stage).paddingLeft) + parseFloat(getComputedStyle(stage).paddingRight);
         var available = stage.clientWidth - padding;
         var scale = available && available < viewportWidth ? available / viewportWidth : 1;
+
+        if (box && box.classList.contains('wcpcsu-preview-box--pinned') && pinQuery.matches) {
+            scale = Math.min(scale, (window.innerHeight * 0.3) / contentHeight);
+        }
 
         frame.style.width = viewportWidth + 'px';
         frame.style.height = contentHeight + 'px';
@@ -267,6 +275,34 @@ jQuery(function ($) {
 
     // The panel width changes with the window, the sidebar and collapsing the meta box.
     new ResizeObserver(layout).observe(stage);
+    window.addEventListener('resize', layout);
+
+    // "Keep in view": the preview box stays at the top while the settings scroll (wcpcsu-admin.css).
+    // On by default; the choice is remembered in this browser.
+    function setPinned(on) {
+        box.classList.toggle('wcpcsu-preview-box--pinned', on);
+        pin.setAttribute('aria-pressed', on ? 'true' : 'false');
+        layout();
+    }
+
+    if (pin && box) {
+        var pinned = true;
+        try {
+            pinned = window.localStorage.getItem('wcpcsuPreviewPinned') !== '0';
+        } catch (e) {
+            // Storage blocked: keep the default.
+        }
+        setPinned(pinned);
+        pin.addEventListener('click', function () {
+            var on = pin.getAttribute('aria-pressed') !== 'true';
+            setPinned(on);
+            try {
+                window.localStorage.setItem('wcpcsuPreviewPinned', on ? '1' : '0');
+            } catch (e) {
+                // Not remembered.
+            }
+        });
+    }
 
     layout();
     refresh();

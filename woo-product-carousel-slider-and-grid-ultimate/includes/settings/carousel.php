@@ -16,11 +16,17 @@ $nav_show            = ! empty( $nav_show ) ? $nav_show : 'yes';
 $nav_position        = ! empty( $nav_position ) ? $nav_position : 'bottom-right';
 $carousel_pagination = ! empty( $carousel_pagination ) ? $carousel_pagination : 'no';
 $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
+// Pro effects saved while Pro was active show (and render) as slide here.
+$carousel_effect     = ( ! empty( $carousel_effect ) && 'fade' === $carousel_effect ) ? 'fade' : 'slide';
 ?>
 <!--TAB 2  Carousel setting -->
 <div id="lcsp-tab-2" class="lcsp-tab-content">
 	<div class="cmb2-wrap form-table">
 		<div id="cmb2-metabox" class="cmb2-metabox cmb-field-list">
+			<div class="wcpscu-sections">
+			<section class="wcpscu-section" data-wcpscu-section="slides">
+			<h3 class="wcpscu-section__title"><?php esc_html_e( 'Slides', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></h3>
+
 
 			<!--Auto Play-->
 			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
@@ -93,8 +99,40 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 					</ul>
 				</div>
 			</div>
+			<!--Effect-->
+			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
+				<div class="cmb-th">
+					<label for="wcpscu_carousel_effect1"><?php esc_html_e( 'Effect', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+				</div>
+				<div class="cmb-td">
+					<ul class="cmb2-radio-list cmb2-list">
+						<li>
+							<input type="radio" class="cmb2-option wcpscu_carousel_effect" name="wcpscu[carousel_effect]" id="wcpscu_carousel_effect1" value="slide" <?php checked( 'slide', $carousel_effect ); ?>>
+							<label for="wcpscu_carousel_effect1"><?php esc_html_e( 'Slide', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li>
+							<input type="radio" class="cmb2-option wcpscu_carousel_effect" name="wcpscu[carousel_effect]" id="wcpscu_carousel_effect2" value="fade" <?php checked( 'fade', $carousel_effect ); ?>>
+							<label for="wcpscu_carousel_effect2"><?php esc_html_e( 'Fade (one product at a time)', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+					</ul>
+					<ul class="cmb2-radio-list-pro">
+						<p><?php esc_html_e( 'Following options available in', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?> <a
+								href="https://wpwax.com/product/woocommerce-product-carousel-slider-grid-ultimate-pro"
+								target="_blank"><?php esc_html_e( 'Pro Version', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></a>:</p>
+						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_pro_effect" id="wcpscu_pro_effect_coverflow" value="coverflow">
+							<label for="wcpscu_pro_effect_coverflow"><?php esc_html_e( 'Coverflow', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+						<li><input disabled type="radio" class="cmb2-option" name="wcpscu_pro_effect" id="wcpscu_pro_effect_flip" value="flip">
+							<label for="wcpscu_pro_effect_flip"><?php esc_html_e( 'Flip', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></label>
+						</li>
+					</ul>
+					<p class="cmb2-metabox-description">
+						<?php esc_html_e( 'Fade cross-fades one product into the next, so the column settings below don\'t apply to it.', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
+					</p>
+				</div>
+			</div>
 			<!--Items on desktop-->
-			<div class="cmb-row cmb-type-text-medium">
+			<div class="cmb-row cmb-type-text-medium wcpscu-fade-hide">
 				<div class="cmb-th">
 					<label for="lcsp_li_desktop">
 						<?php esc_html_e( 'Products Column', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
@@ -198,6 +236,11 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 				</div>
 			</div>
 
+			</section>
+
+			<section class="wcpscu-section" data-wcpscu-section="navigation">
+			<h3 class="wcpscu-section__title"><?php esc_html_e( 'Navigation', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></h3>
+
 			<!-- Navigation show/hide -->
 			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
 				<div class="cmb-th">
@@ -294,6 +337,11 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 					</div>
 				</div>
 			</div>
+			</section>
+
+			<section class="wcpscu-section" data-wcpscu-section="dots">
+			<h3 class="wcpscu-section__title"><?php esc_html_e( 'Dots', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></h3>
+
 			<!-- Navigation show/hide -->
 			<div class="cmb-row cmb-type-radio wcpscu-ticker-hide">
 				<div class="cmb-th">
@@ -347,6 +395,8 @@ $repeat_product      = ! empty( $repeat_product ) ? $repeat_product : 'yes';
 					</div>
 				</div>
 			</div>
+			</section>
+			</div><!-- end wcpscu-sections -->
 		</div>
 	</div> <!-- end cmb2-wrap -->
 </div> <!-- end lcsp-tab-2 -->

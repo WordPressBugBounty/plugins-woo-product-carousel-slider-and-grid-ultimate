@@ -115,6 +115,10 @@
     "type":"boolean",
     "default":false
   },
+  "carousel_effect":{
+    "type":"string",
+    "default":"slide"
+  },
   "scrool_direction":{
     "type":"string",
     "default":"right_left"
@@ -178,6 +182,10 @@
   "grid_pagination_type":{
     "type":"string",
     "default": "normal"
+  },
+  "img_hover_swap":{
+    "type":"boolean",
+    "default": false
   },
   "img_crop":{
     "type":"boolean",

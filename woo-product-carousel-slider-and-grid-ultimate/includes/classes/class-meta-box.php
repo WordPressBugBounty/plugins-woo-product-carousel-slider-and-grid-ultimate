@@ -79,6 +79,10 @@ class WCPCSU_Meta_Box {
 					<?php } ?>
 				</div>
 				<span class="wcpcsu-preview__status" aria-live="polite"></span>
+				<button type="button" class="wcpcsu-preview__pin" aria-pressed="true" title="<?php esc_attr_e( 'Keep the preview at the top while you scroll the settings', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>">
+					<span class="dashicons dashicons-admin-post" aria-hidden="true"></span>
+					<?php esc_html_e( 'Keep in view', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?>
+				</button>
 			</div>
 			<div class="wcpcsu-preview__stage">
 				<div class="wcpcsu-preview__frame-wrap">
@@ -117,9 +121,12 @@ class WCPCSU_Meta_Box {
 		}
 
 		if ( ! empty( $_POST['wcpscu'] ) ) {
-			$wcpscu = WCPCSU_Main::json_encoded( wcpcsu_sanitize_array( $_POST['wcpscu'] ) );
+			// $_POST is slashed and update_post_meta() unslashes: unslash the values first and slash the
+			// JSON, or its escapes are lost ("Café" was stored as "Cafu00e9", and a quote broke the whole value).
+			$settings = wp_unslash( $_POST['wcpscu'] );
+			$wcpscu   = WCPCSU_Main::json_encoded( wcpcsu_sanitize_array( $settings ) );
 			//save the meta value
-			update_post_meta( $post_id, 'wcpscu', $wcpscu );
+			update_post_meta( $post_id, 'wcpscu', wp_slash( $wcpscu ) );
 		} else {
 			delete_post_meta( $post_id, 'wcpscu' );
 		}

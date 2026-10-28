@@ -236,6 +236,7 @@ if ( ! function_exists( 'wcpcsu_product_image_html' ) ) {
 	 *     @type bool   $eager   Load immediately (first visible row) instead of lazily.
 	 *     @type string $alt     Alt text.
 	 *     @type array  $columns Visible columns per breakpoint: [ 'desktop' => 4, 'tablet' => 2, 'mobile' => 1 ].
+	 *     @type string $class   Class for the <img> (replaces WordPress' attachment classes when set).
 	 * }
 	 * @return string
 	 */
@@ -247,9 +248,11 @@ if ( ! function_exists( 'wcpcsu_product_image_html' ) ) {
 			'eager'   => false,
 			'alt'     => '',
 			'columns' => array(),
+			'class'   => '',
 		) );
 
 		$loading = $args['eager'] ? 'eager' : 'lazy';
+		$class   = $args['class'] ? ' class="' . esc_attr( $args['class'] ) . '"' : '';
 
 		// How wide the card is per breakpoint, so the browser picks a large enough file from srcset.
 		$sizes = '';
@@ -272,7 +275,8 @@ if ( ! function_exists( 'wcpcsu_product_image_html' ) ) {
 		// No thumbnail: WooCommerce placeholder, sized like the other cards.
 		if ( ! $attachment_id ) {
 			return sprintf(
-				'<img src="%s" alt="%s" width="%d" height="%d" loading="%s" decoding="async">',
+				'<img%s src="%s" alt="%s" width="%d" height="%d" loading="%s" decoding="async">',
+				$class,
 				esc_url( wc_placeholder_img_src( 'woocommerce_single' ) ),
 				esc_attr( $args['alt'] ),
 				absint( $args['width'] ),
@@ -291,6 +295,10 @@ if ( ! function_exists( 'wcpcsu_product_image_html' ) ) {
 
 			if ( $sizes ) {
 				$attrs['sizes'] = $sizes;
+			}
+
+			if ( $args['class'] ) {
+				$attrs['class'] = $args['class'];
 			}
 
 			$html = wp_get_attachment_image( $attachment_id, 'large', false, $attrs );
@@ -326,7 +334,8 @@ if ( ! function_exists( 'wcpcsu_product_image_html' ) ) {
 		}
 
 		return sprintf(
-			'<img src="%s"%s alt="%s" width="%d" height="%d" loading="%s" decoding="async">',
+			'<img%s src="%s"%s alt="%s" width="%d" height="%d" loading="%s" decoding="async">',
+			$class,
 			esc_url( $image['url'] ),
 			$srcset,
 			esc_attr( $args['alt'] ),

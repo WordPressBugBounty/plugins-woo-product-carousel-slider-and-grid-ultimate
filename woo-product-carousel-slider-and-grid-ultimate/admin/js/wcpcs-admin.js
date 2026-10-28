@@ -20,6 +20,11 @@ jQuery(document).ready(function ($) {
     });
 
 
+    // Carousel effect: fade shows one product, so data-wcpscu-effect hides the columns row (wcpcsu-admin.css).
+    $('.wcpscu_carousel_effect').on('change', function () {
+        $('#lcsp-tabs-container').attr('data-wcpscu-effect', $(this).val());
+    });
+
     // Layout tiles: check the layout's radio and show the settings tab it uses (data-tab).
     // data-wcpscu-layout hides the rows the layout doesn't use (wcpcsu-admin.css). Pro tiles do nothing.
     $('.cmd-switch > div:not(.cmd-switch-pro)').on('click', function (e) {

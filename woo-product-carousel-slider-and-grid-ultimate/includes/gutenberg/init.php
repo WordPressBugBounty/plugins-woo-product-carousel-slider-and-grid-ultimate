@@ -55,6 +55,7 @@ function render_callback( $attributes ) {
     $attributes['grid_pagination']              = ! empty( $attributes['grid_pagination'] ) ? 'yes' : 'no';
     $attributes['img_hover_effect']             = ! empty( $attributes['img_hover_effect'] ) ? 'yes' : 'no';
     $attributes['img_crop']                     = ! empty( $attributes['img_crop'] ) ? 'yes' : 'no';
+    $attributes['img_hover_swap']               = ! empty( $attributes['img_hover_swap'] ) ? 'yes' : 'no';
 
     return run_shortcode( 'wcpcsu', $attributes );
     

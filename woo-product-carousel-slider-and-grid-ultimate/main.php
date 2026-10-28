@@ -3,7 +3,7 @@
 Plugin Name: Product Carousel Slider & Grid Ultimate for WooCommerce
 Plugin URI:  https://wpwax.com/product/woocommerce-product-carousel-slider-grid-ultimate-pro
 Description: It is a fully responsive and mobile friendly WooCommerce Product Carousel, Slider and Grid plugin which comes with lots of features.
-Version:     1.13.0
+Version:     1.14.0
 Author:      wpWax
 Author URI:  https://wpwax.com
 License:     GPL2
@@ -246,6 +246,12 @@ if( ! in_array('woocommerce-product-carousel-slider-grid-ultimate-pro/main.php',
                     wp_enqueue_style( 'woocommerce_admin_styles' );
                 }
                 wp_enqueue_script( 'wcpcsu-admin-js', WCPCSU_URL . 'admin/js/wcpcs-admin.js', $admin_deps, $this->file_version( 'admin/js/wcpcs-admin.js' ) );
+                // Section menus and help tooltips of the settings tabs (the same file in Free and Pro).
+                wp_enqueue_script( 'wcpcsu-settings-ui-js', WCPCSU_URL . 'admin/js/wcpcsu-settings-ui.js', array( 'jquery', 'wcpcsu-admin-js' ), $this->file_version( 'admin/js/wcpcsu-settings-ui.js' ), true );
+                wp_localize_script( 'wcpcsu-settings-ui-js', 'wcpcsuSettingsUi', array(
+                    'help'     => __( 'Help', 'woocommerce-product-carousel-slider-and-grid-ultimate' ),
+                    'sections' => __( 'Settings sections', 'woocommerce-product-carousel-slider-and-grid-ultimate' ),
+                ) );
 
                 // Live preview panel on the edit screen (WCPCSU_Preview REST endpoint).
                 if ( 'post.php' == $pagenow || 'post-new.php' == $pagenow ) {

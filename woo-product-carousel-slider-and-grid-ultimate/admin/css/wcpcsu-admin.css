@@ -1230,7 +1230,8 @@ ul.lcs_pro_features {
 /* Rows a layout doesn't use (data-wcpscu-layout, set by settings.php and the layout tiles). */
 #lcsp-tabs-container[data-wcpscu-layout="ticker"] .wcpscu-ticker-hide,
 #lcsp-tabs-container[data-wcpscu-layout="list"] .wcpscu-list-hide,
-#lcsp-tabs-container:not([data-wcpscu-layout="ticker"]) .wcpscu-ticker-only {
+#lcsp-tabs-container:not([data-wcpscu-layout="ticker"]) .wcpscu-ticker-only,
+#lcsp-tabs-container[data-wcpscu-layout="carousel"][data-wcpscu-effect="fade"] .wcpscu-fade-hide {
     display: none !important;
 }
 
@@ -1931,4 +1932,355 @@ h1.wpcs-admin-header {
 .wcpscu-handpicked__remove:hover,
 .wcpscu-handpicked__remove:focus-visible {
     color: #FF408C;
+}
+
+/* =====================================================================
+   Settings layout: sections, section menu, help tooltips, compact rows,
+   pinned live preview (admin/js/wcpcsu-settings-ui.js, wcpcsu-preview.js).
+   The same block in Free and Pro. Only the layout changes; no field does.
+   ===================================================================== */
+
+.postbox-container .wcpscu-section > .cmb-row {
+    padding: 14px 0;
+    border-bottom: 1px solid #F1F2F6;
+}
+
+.postbox-container .wcpscu-section > .cmb-row:last-child {
+    border-bottom: 0;
+}
+
+.wcpscu-section__title {
+    margin: 28px 0 4px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E3E6EF;
+    color: #272B41;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.wcpscu-section:first-child .wcpscu-section__title {
+    margin-top: 12px;
+}
+
+/* Section menu (added by the script): one section at a time. */
+.wcpscu-sections--ready {
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 0 32px;
+    align-items: start;
+}
+
+.wcpscu-sections--ready > .wcpscu-section:not(.is-active) {
+    display: none;
+}
+
+.wcpscu-sections--ready .wcpscu-section__title {
+    margin-top: 12px;
+}
+
+.wcpscu-sections__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 0;
+    border-right: 1px solid #E3E6EF;
+    align-self: stretch;
+}
+
+.wcpscu-sections__link {
+    margin: 0;
+    padding: 10px 14px;
+    border: 0;
+    border-left: 3px solid transparent;
+    border-radius: 0 4px 4px 0;
+    background: none;
+    color: #5A5F7D;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wcpscu-sections__link:hover {
+    background: #F6F5FF;
+    color: #272B41;
+}
+
+.wcpscu-sections__link[aria-selected="true"] {
+    border-left-color: #834EFF;
+    background: #F3EEFF;
+    color: #834EFF;
+    font-weight: 600;
+}
+
+.wcpscu-sections__link:focus-visible {
+    outline: 2px solid #834EFF;
+    outline-offset: -2px;
+}
+
+.wcpscu-sections__link[hidden] {
+    display: none;
+}
+
+@media (max-width: 960px) {
+    .wcpscu-sections--ready {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wcpscu-sections__nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 8px 0 0;
+        border-right: 0;
+        border-bottom: 1px solid #E3E6EF;
+    }
+
+    .wcpscu-sections__link {
+        border-left: 0;
+        border-bottom: 3px solid transparent;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .wcpscu-sections__link[aria-selected="true"] {
+        border-bottom-color: #834EFF;
+    }
+}
+
+/* Help tooltip next to a label (long descriptions). */
+.cmb-th:has(> .wcpscu-help) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wcpscu-help {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    vertical-align: middle;
+}
+
+.wcpscu-help__toggle {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #B8BED3;
+    border-radius: 50%;
+    background: #fff;
+    color: #5A5F7D;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    cursor: help;
+}
+
+.wcpscu-help__toggle:hover,
+.wcpscu-help.is-open .wcpscu-help__toggle {
+    border-color: #834EFF;
+    color: #834EFF;
+}
+
+.wcpscu-help__toggle:focus-visible {
+    outline: 2px solid #834EFF;
+    outline-offset: 2px;
+}
+
+.wcpscu-help__text {
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    top: calc(100% + 8px);
+    left: -12px;
+    width: 320px;
+    max-width: 70vw;
+    padding: 10px 12px;
+    border-radius: 4px;
+    background: #272B41;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+    text-align: left;
+}
+
+/* Keeps the tooltip open while the pointer crosses the gap. */
+.wcpscu-help__text::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
+.wcpscu-help:hover .wcpscu-help__text,
+.wcpscu-help:focus-within .wcpscu-help__text,
+.wcpscu-help.is-open .wcpscu-help__text {
+    display: block;
+}
+
+.wcpscu-help__text p.cmb2-metabox-description {
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.55;
+}
+
+.wcpscu-help__text p.cmb2-metabox-description + p.cmb2-metabox-description {
+    margin-top: 6px;
+}
+
+.wcpscu-help__text a {
+    color: #C9B5FF;
+}
+
+/* Products Type: the radios in columns. */
+.wcpscu-products-types .cmb-td > .cmb2-radio-list,
+.wcpscu-products-types .cmb-td > .cmb2-radio-list-pro {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 2px 20px;
+}
+
+.wcpscu-products-types .cmb-td > .cmb2-radio-list-pro > p {
+    grid-column: 1 / -1;
+}
+
+/* The selected type's own fields (category, IDs, …), moved under the grid by the script. */
+.wcpscu-products-type-fields {
+    max-width: 560px;
+    margin-top: 12px;
+    padding: 4px 16px 14px;
+    border: 1px solid #E3E6EF;
+    border-radius: 6px;
+    background: #F8F9FB;
+}
+
+.wcpscu-products-type-fields:not(:has(> :not([style*="display: none"]))) {
+    display: none;
+}
+
+.wcpscu-products-type-fields > p.cmb2-metabox-description {
+    margin: 10px 0 0;
+}
+
+/* Colors side by side. */
+.wcpscu-sections .cmb-navigation,
+.wcpscu-sections .cmb-td:has(> .cmb-navigation-item) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px 24px;
+    align-items: start;
+}
+
+.wcpscu-sections .cmb-td:has(> .cmb-navigation-item) > :not(.cmb-navigation-item):not(.cmb-header-font-styles) {
+    grid-column: 1 / -1;
+}
+
+.wcpscu-sections .cmb-navigation-item {
+    margin-bottom: 0;
+}
+
+/* The color picker opens over the next fields instead of pushing them down. */
+.wcpscu-sections .wp-picker-container {
+    position: relative;
+}
+
+.wcpscu-sections .wp-picker-holder {
+    position: absolute;
+    z-index: 30;
+    top: 100%;
+    left: 0;
+}
+
+/* Badges: switch, text and position on one line. */
+.wcpscu-section[data-wcpscu-section="badges"] .cmb-td {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 24px;
+}
+
+.wcpscu-section[data-wcpscu-section="badges"] .cmb-td > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.wcpscu-section[data-wcpscu-section="badges"] .cmb-td > div > label {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.wcpscu-section[data-wcpscu-section="badges"] .cmb-td > .cmb2-metabox-description {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+/* "Enter the text for the … ribbon": the label and the placeholder say it already. */
+.wcpscu-section[data-wcpscu-section="badges"] .cmb-td > div > .cmb2-metabox-description {
+    display: none;
+}
+
+.cmb2-wrap .wcpscu-section[data-wcpscu-section="badges"] .cmb-td input.cmb2-text-medium {
+    margin: 0 !important;
+}
+
+/* Pinned live preview: stays at the top while the settings scroll (wcpcsu-preview.js). */
+.wcpcsu-preview__pin {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding: 4px 10px;
+    border: 1px solid #E3E6EF;
+    border-radius: 4px;
+    background: #fff;
+    color: #5A5F7D;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.wcpcsu-preview__pin .dashicons {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+}
+
+.wcpcsu-preview__pin[aria-pressed="true"] {
+    border-color: #834EFF;
+    background: #F3EEFF;
+    color: #834EFF;
+}
+
+.wcpcsu-preview__pin:focus-visible {
+    outline: 2px solid #834EFF;
+    outline-offset: 1px;
+}
+
+@media (max-width: 782px), (max-height: 699px) {
+    .wcpcsu-preview__pin {
+        display: none;
+    }
+}
+
+@media (min-width: 783px) and (min-height: 700px) {
+    /* The meta boxes are transparent (#postbox-container-2 .postbox): pinned, the box needs the page
+       background, or the settings scrolling behind it show through its gaps. */
+    #poststuff .postbox.wcpcsu-preview-box--pinned {
+        position: sticky;
+        z-index: 50;
+        top: 32px;
+        padding-bottom: 10px;
+        background: #F0F0F1;
+        box-shadow: 0 10px 12px -10px rgba(39, 43, 65, .25);
+    }
+
+    .wcpcsu-preview-box--pinned .wcpcsu-preview__note {
+        display: none;
+    }
 }

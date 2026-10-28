@@ -58,6 +58,14 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 	}
 
 	public function wpcsu_fields() {
+		$not_fade = array(
+			'relation' => 'or',
+			'terms'    => array(
+				array( 'name' => 'layout', 'operator' => '!==', 'value' => 'carousel' ),
+				array( 'name' => 'carousel_effect', 'operator' => '!==', 'value' => 'fade' ),
+			),
+		);
+
 		$fields = array(
 			//layout section
 			array(
@@ -417,28 +425,48 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'condition' => array( 'layout' => 'ticker' ),
 			),
 			array(
+				'type'        => Controls_Manager::SELECT,
+				'id'          => 'carousel_effect',
+				'label'       => __( 'Effect', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'options'     => array(
+					'slide' => __( 'Slide', 'woocommerce-product-carousel-slider-and-ultimate' ),
+					'fade'  => __( 'Fade (one product at a time)', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				),
+				'default'     => 'slide',
+				'description' => __( 'Fade shows one product at a time. Coverflow and Flip are in the Pro version.', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'condition'   => array( 'layout' => 'carousel' ),
+			),
+			array(
 				'type'      => Controls_Manager::TEXT,
 				'id'        => 'c_desktop',
 				'label'     => __( 'Products Columns', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 3,
+				// Fade shows one product, so the columns don't apply to a fade carousel.
+				'conditions' => $not_fade,
 			),
 			array(
 				'type'      => Controls_Manager::TEXT,
 				'id'        => 'c_desktop_small',
 				'label'     => __( 'Laptop Columns', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 2,
+				// Fade shows one product, so the columns don't apply to a fade carousel.
+				'conditions' => $not_fade,
 			),
 			array(
 				'type'      => Controls_Manager::TEXT,
 				'id'        => 'c_tablet',
 				'label'     => __( 'Tablet Columns', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 2,
+				// Fade shows one product, so the columns don't apply to a fade carousel.
+				'conditions' => $not_fade,
 			),
 			array(
 				'type'      => Controls_Manager::TEXT,
 				'id'        => 'c_mobile',
 				'label'     => __( 'Mobile Columns', 'woocommerce-product-carousel-slider-and-ultimate' ),
 				'default'   => 1,
+				// Fade shows one product, so the columns don't apply to a fade carousel.
+				'conditions' => $not_fade,
 				'separator' => 'after'
 			),
 			array(
@@ -569,6 +597,13 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 				'mode'    => 'section_start',
 				'id'      => 'sec_image',
 				'label'   => __( 'Image', 'woocommerce-product-carousel-slider-and-ultimate' ),
+			),
+			array(
+				'type'        => Controls_Manager::SWITCHER,
+				'id'          => 'img_hover_swap',
+				'label'       => __( 'Swap Image on Hover', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'description' => __( 'Shows the first gallery image when the card is hovered.', 'woocommerce-product-carousel-slider-and-ultimate' ),
+				'default'     => '',
 			),
 			array(
 				'type'      => Controls_Manager::SWITCHER,
@@ -2540,6 +2575,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 			'display_ratings'               => $settings['display_ratings'] ? $settings['display_ratings'] : 'no',
 			'display_cart'                  => $settings['display_cart'] ? $settings['display_cart'] : 'no',
 			'img_crop'                 		=> $settings['img_crop'] ? $settings['img_crop'] : 'no',
+			'img_hover_swap'                => $settings['img_hover_swap'] ? $settings['img_hover_swap'] : 'no',
 			'crop_image_width'              => $settings['crop_image_width'] ? $settings['crop_image_width'] : '350',
 			'crop_image_height'             => $settings['crop_image_height'] ? $settings['crop_image_height'] : '250',
 			'auto_play'                 	=> $settings['A_play'] ? $settings['A_play'] : 'no',
@@ -2547,6 +2583,7 @@ class Elementor_Woo_Ultimate_Widget extends \Elementor\Widget_Base {
 			// Carousel: kept as it always was (pauses on hover whatever the switch says). Ticker: follows the switch.
 			'stop_hover'                 	=> 'ticker' === $settings['layout'] ? ( 'yes' === $settings['stop_hover'] ? 'true' : 'false' ) : ( $settings['stop_hover'] ? false : true ),
 			'scrool_direction'              => ! empty( $settings['scrool_direction'] ) ? $settings['scrool_direction'] : 'right_left',
+			'carousel_effect'               => ! empty( $settings['carousel_effect'] ) ? $settings['carousel_effect'] : 'slide',
 			'c_desktop'                 	=> $settings['c_desktop'] ? $settings['c_desktop'] : '3',
 			'c_desktop_small'               => $settings['c_desktop_small'] ? $settings['c_desktop_small'] : '3',
 			'c_tablet'                 		=> $settings['c_tablet'] ? $settings['c_tablet'] : '2',

@@ -12,7 +12,7 @@ $layout       = ( ! empty( $layout ) && in_array( $layout, array( 'carousel', 'g
 $is_grid_tabs = in_array( $layout, array( 'grid', 'list' ), true );
 ?>
 <!--TAB 1  Shortcode -->
-<div id="lcsp-tabs-container" data-wcpscu-layout="<?php echo esc_attr( $layout ); ?>">
+<div id="lcsp-tabs-container" data-wcpscu-layout="<?php echo esc_attr( $layout ); ?>" data-wcpscu-effect="<?php echo esc_attr( ( ! empty( $carousel_effect ) && 'fade' === $carousel_effect ) ? 'fade' : 'slide' ); ?>">
     <div class="lcsp-tabs-menu-wrapper">
         <ul class="lcsp-tabs-menu">
             <li class="current">

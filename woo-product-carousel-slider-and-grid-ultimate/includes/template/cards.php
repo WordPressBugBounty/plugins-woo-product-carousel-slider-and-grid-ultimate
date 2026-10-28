@@ -37,6 +37,21 @@ while( $loop->have_posts() ) : $loop->the_post();
 		'alt'     => get_the_title(),
 		'columns' => $image_columns,
 	) );
+
+	// Hover swap: the first gallery image, laid over the main one and shown on hover (CSS).
+	// Always lazy and with an empty alt: it is decorative and the main image carries the name.
+	if ( 'yes' === $img_hover_swap ) {
+		$gallery_ids = $product->get_gallery_image_ids();
+		if ( $thumb && ! empty( $gallery_ids ) ) {
+			$wpcsu_img_html .= wcpcsu_product_image_html( (int) reset( $gallery_ids ), array(
+				'crop'    => 'yes' === $img_crop,
+				'width'   => $crop_image_width,
+				'height'  => $crop_image_height,
+				'columns' => $image_columns,
+				'class'   => 'wpcu-product__img-hover',
+			) );
+		}
+	}
 	$item_index++;
 	$sale_price = $product->get_sale_price();
 	$ratings    = ( ( $product->get_average_rating() / 5 ) * 100 );

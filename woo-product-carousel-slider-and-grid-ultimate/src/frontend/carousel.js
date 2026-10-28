@@ -3,29 +3,31 @@
  *
  * Vanilla replacement for assets/js/main.js: no jQuery, and only the Swiper 11
  * parts the carousel uses instead of the full prebuilt swiper-bundle. The
- * Pagination module (dots) is loaded on demand, only when a carousel on the
- * page has dots enabled.
+ * Pagination module (dots) and the fade effect are loaded on demand, only when
+ * a carousel on the page uses them.
  */
 import Swiper from 'swiper';
 import { Navigation, Autoplay } from 'swiper/modules';
 
-let paginationModule;
+let swiperModules;
 let filterModule;
 
 /**
- * Load the Pagination module once, as a separate chunk.
+ * Load Swiper's optional modules once, as a separate chunk (carousel-modules): Pagination
+ * for carousels with dots, EffectFade for fade carousels. Both come from one import of
+ * 'swiper/modules' (the package exports no deeper path), so they share the chunk.
  *
- * @return {Promise} Resolves with the Pagination module.
+ * @return {Promise} Resolves with { Pagination, EffectFade }.
  */
-function loadPagination() {
-	if ( ! paginationModule ) {
-		paginationModule = import(
-			/* webpackChunkName: "carousel-pagination" */
+function loadSwiperModules() {
+	if ( ! swiperModules ) {
+		swiperModules = import(
+			/* webpackChunkName: "carousel-modules" */
 			'swiper/modules'
-		).then( ( { Pagination } ) => Pagination );
+		).then( ( { Pagination, EffectFade } ) => ( { Pagination, EffectFade } ) );
 	}
 
-	return paginationModule;
+	return swiperModules;
 }
 
 /**
@@ -114,8 +116,11 @@ function initCarousel( el ) {
 
 	const data          = el.dataset;
 	const paginationEl  = el.querySelector( '.wpcu-carousel-pagination' );
-	const createSwiper  = ( modules ) => new Swiper( el, {
+	const isFade        = 'fade' === data.wpcuEffect;
+	const createSwiper  = ( modules, fade ) => new Swiper( el, {
 		modules,
+		// Fade shows one slide; the shortcode prints one column at every breakpoint for it.
+		...( fade ? { effect: 'fade', fadeEffect: { crossFade: true } } : {} ),
 		slidesPerView:  parseNumber( data.wpcuItems, 4 ),
 		spaceBetween:   parseNumber( data.wpcuMargin, 30 ),
 		loop:           parseJSON( ( data.wpcuLoop || 'false' ).toLowerCase(), false ),
@@ -134,13 +139,23 @@ function initCarousel( el ) {
 		breakpoints: parseJSON( data.wpcuResponsive, {} ),
 	} );
 
-	// The pagination container is only printed when dots are enabled.
-	if ( paginationEl ) {
-		loadPagination()
-			.then( ( Pagination ) => createSwiper( [ Navigation, Autoplay, Pagination ] ) )
-			.catch( () => createSwiper( [ Navigation, Autoplay ] ) );
+	// The pagination container is only printed when dots are enabled. If the chunk fails to
+	// load, the carousel starts without dots and slides instead of fading.
+	if ( paginationEl || isFade ) {
+		loadSwiperModules()
+			.then( ( { Pagination, EffectFade } ) => {
+				const modules = [ Navigation, Autoplay ];
+				if ( paginationEl ) {
+					modules.push( Pagination );
+				}
+				if ( isFade ) {
+					modules.push( EffectFade );
+				}
+				createSwiper( modules, isFade );
+			} )
+			.catch( () => createSwiper( [ Navigation, Autoplay ], false ) );
 	} else {
-		createSwiper( [ Navigation, Autoplay ] );
+		createSwiper( [ Navigation, Autoplay ], false );
 	}
 }
 

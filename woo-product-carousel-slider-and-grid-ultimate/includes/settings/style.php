@@ -10,6 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div id="lcsp-tab-4" class="lcsp-tab-content">
     <div class="cmb2-wrap form-table">
         <div id="cmb2-metabox" class="cmb2-metabox cmb-field-list">
+            <div class="wcpscu-sections">
+            <section class="wcpscu-section" data-wcpscu-section="text">
+            <h3 class="wcpscu-section__title"><?php esc_html_e( 'Text', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></h3>
+
             <div class="cmb-row cmb-type-text-medium">
                 <div class="cmb-th">
                     <label for="wcpscu_header_title_font_size"><?php esc_html_e('Header Font Size', 'woocommerce-product-carousel-slider-and-grid-ultimate'); ?></label>
@@ -190,6 +194,11 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </div>
             </div>
 
+            </section>
+
+            <section class="wcpscu-section" data-wcpscu-section="buttons">
+            <h3 class="wcpscu-section__title"><?php esc_html_e( 'Buttons & Badges', 'woocommerce-product-carousel-slider-and-grid-ultimate' ); ?></h3>
+
             <div class="cmb-row cmb-type-colorpicker">
                 <div class="cmb-th">
                     <label
@@ -324,6 +333,8 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </div>
                 </div>
             </div>
+            </section>
+            </div><!-- end wcpscu-sections -->
         </div> <!-- end cmb2-metabox -->
     </div> <!-- end cmb2-wrap -->
 </div> <!-- end lcsp-tab-4

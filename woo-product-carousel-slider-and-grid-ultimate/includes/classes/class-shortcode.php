@@ -57,6 +57,7 @@ class WCPCSU_Shortcode {
             'display_ratings'           => '',
             'display_cart'              => '',
             'img_crop'                  => '',
+            'img_hover_swap'            => '',
             'crop_image_width'          => '',
             'crop_image_height'         => '',
             'auto_play'                 => '',
@@ -68,6 +69,7 @@ class WCPCSU_Shortcode {
             'c_tablet'                  => '',
             'c_mobile'                  => '',
             'slide_speed'               => '',
+            'carousel_effect'           => '', // slide | fade (Pro: coverflow, flip)
             'slide_time'                => '',
             'nav_show'                  => '',
             'nav_position'              => '',
@@ -159,6 +161,7 @@ class WCPCSU_Shortcode {
 		$layout                  = ! empty( $layout ) ? $layout : 'carousel';
 		$products_type           = ! empty( $products_type ) ? $products_type : 'latest';
 		$img_crop                = ! empty( $img_crop ) ? $img_crop : 'yes';
+		$img_hover_swap          = ! empty( $img_hover_swap ) ? $img_hover_swap : 'no';
 		$crop_image_width        = ! empty( $crop_image_width ) ? intval( $crop_image_width ) : 300;
 		$crop_image_height       = ! empty( $crop_image_height ) ? intval( $crop_image_height ) : 300;
 		$display_price           = ! empty( $display_price ) ? $display_price : 'yes';
@@ -262,6 +265,7 @@ class WCPCSU_Shortcode {
 		$c_desktop_small            = isset( $c_desktop_small ) ? $c_desktop_small : '';
 		$c_tablet                   = isset( $c_tablet ) ? $c_tablet : '';
 		$c_mobile                   = isset( $c_mobile ) ? $c_mobile : '';
+		$carousel_effect            = isset( $carousel_effect ) ? $carousel_effect : '';
 
 		// shortcode attribute
         $layout                     = ! empty( $atts['layout'] ) ? $atts['layout'] : $layout;
@@ -294,6 +298,7 @@ class WCPCSU_Shortcode {
         $display_ratings            = ! empty( $atts['display_ratings'] ) ? $atts['display_ratings'] : $display_ratings;
         $display_cart               = ! empty( $atts['display_cart'] ) ? $atts['display_cart'] : $display_cart;
         $img_crop                   = ! empty( $atts['img_crop'] ) ? $atts['img_crop'] : $img_crop;
+        $img_hover_swap             = ! empty( $atts['img_hover_swap'] ) ? $atts['img_hover_swap'] : $img_hover_swap;
         $crop_image_width           = ! empty( $atts['crop_image_width'] ) ? $atts['crop_image_width'] : $crop_image_width;
         $crop_image_height          = ! empty( $atts['crop_image_height'] ) ? $atts['crop_image_height'] : $crop_image_height;
         $A_play                     = ! empty( $atts['auto_play'] ) ? $atts['auto_play'] : $A_play;
@@ -305,6 +310,11 @@ class WCPCSU_Shortcode {
         $c_tablet                   = ! empty( $atts['c_tablet'] ) ? $atts['c_tablet'] : $c_tablet;
         $c_mobile                   = ! empty( $atts['c_mobile'] ) ? $atts['c_mobile'] : $c_mobile;
         $slide_speed                = ! empty( $atts['slide_speed'] ) ? $atts['slide_speed'] : $slide_speed;
+        $carousel_effect            = ! empty( $atts['carousel_effect'] ) ? $atts['carousel_effect'] : $carousel_effect;
+		// Pro effects (coverflow, flip) fall back to slide. Fade shows one product at a time (Swiper's fade
+		// can't show several), so it sets every breakpoint to one column below.
+		$carousel_effect 			= in_array( $carousel_effect, array( 'slide', 'fade' ), true ) ? $carousel_effect : 'slide';
+		$is_fade 					= 'carousel' === $layout && 'fade' === $carousel_effect;
         $slide_time                 = ! empty( $atts['slide_time'] ) ? $atts['slide_time'] : $slide_time;
         $nav_show                   = ! empty( $atts['nav_show'] ) ? $atts['nav_show'] : $nav_show;
         $nav_position               = ! empty( $atts['nav_position'] ) ? $atts['nav_position'] : $nav_position;
@@ -381,6 +391,9 @@ class WCPCSU_Shortcode {
 		$carousel_laptop_column     = ! empty( $c_desktop_small ) ? intval( $c_desktop_small ) : 3;
 		$carousel_tablet_column     = ! empty( $c_tablet ) ? intval( $c_tablet ) : 2;
 		$carousel_mobile_column     = ! empty( $c_mobile ) ? intval( $c_mobile ) : 1;
+		if ( $is_fade ) {
+			$carousel_desktop_column = $carousel_laptop_column = $carousel_tablet_column = $carousel_mobile_column = 1;
+		}
 
 		// Cards only (AJAX filters): no products prints nothing; the caller reports the empty result.
 		if ( $cards_only ) {
@@ -449,7 +462,7 @@ class WCPCSU_Shortcode {
 		<?php } ?>
 
 		<div
-		class="wpcu-products wpcu-<?php echo esc_attr( $theme ); ?><?php echo ( 'carousel' == $layout ) ? ' wpcu-carousel' : ''; ?><?php echo $is_ticker ? ' wpcu-ticker' . ( 'true' == $stop_hover ? ' wpcu-ticker--pause' : '' ) . ( 'left_right' === $scrool_direction ? ' wpcu-ticker--reverse' : '' ) : ''; ?><?php echo ( 'list' === $layout ) ? ' wpcu-layout-list' : ''; ?><?php echo ( 'yes' === $img_crop ) ? ' wpcu-products--img-ratio' : ''; ?>"
+		class="wpcu-products wpcu-<?php echo esc_attr( $theme ); ?><?php echo ( 'carousel' == $layout ) ? ' wpcu-carousel' : ''; ?><?php echo $is_ticker ? ' wpcu-ticker' . ( 'true' == $stop_hover ? ' wpcu-ticker--pause' : '' ) . ( 'left_right' === $scrool_direction ? ' wpcu-ticker--reverse' : '' ) : ''; ?><?php echo ( 'list' === $layout ) ? ' wpcu-layout-list' : ''; ?><?php echo ( 'yes' === $img_crop ) ? ' wpcu-products--img-ratio' : ''; ?><?php echo ( 'yes' === $img_hover_swap ) ? ' wpcu-products--hover-swap' : ''; ?>"
 		style="
 			<?php if ( 'yes' === $img_crop ) { // Reserves the image height before it loads. ?>
 			--wpcu-imgRatio: <?php echo esc_attr( (int) $crop_image_width . ' / ' . (int) $crop_image_height ); ?>;
@@ -481,6 +494,9 @@ class WCPCSU_Shortcode {
 		data-wpcu-loop="<?php echo ( 'yes' == $repeat_product ) ? 'true' : 'false'; ?>"
 		data-wpcu-perslide="1"
 		data-wpcu-speed="<?php echo esc_attr( $slide_speed ); ?>"
+		<?php if ( $is_fade ) { // build/carousel.js loads Swiper's fade module only for these. ?>
+		data-wpcu-effect="fade"
+		<?php } ?>
 		data-wpcu-autoplay='
 		<?php if( 'yes' == $A_play ) { ?>
 		{

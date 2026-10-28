@@ -109,6 +109,7 @@ registerBlockType( 'wcpcsup/block', {
 			repeat_product,
 			stop_hover,
 			scrool_direction,
+			carousel_effect,
 			c_desktop,
 			c_desktop_small,
 			c_tablet,
@@ -124,6 +125,7 @@ registerBlockType( 'wcpcsup/block', {
 			grid_pagination,
 			grid_pagination_type,
 			img_crop,
+			img_hover_swap,
 			crop_image_width,
 			crop_image_height
 		} = attributes;
@@ -416,6 +418,19 @@ registerBlockType( 'wcpcsup/block', {
 								onChange={ newState => setAttributes( { scrool_direction: newState } ) }
 							/> : '' }
 
+							{ layout == 'carousel' ? <SelectControl
+								label={ __( 'Effect', 'woocommerce-product-carousel-slider-and-ultimate' ) }
+								value={ carousel_effect }
+								options={ [
+									{ label: __( 'Slide', 'woocommerce-product-carousel-slider-and-ultimate' ), value: 'slide' },
+									{ label: __( 'Fade (one product at a time)', 'woocommerce-product-carousel-slider-and-ultimate' ), value: 'fade' },
+									{ label: __( 'Coverflow (Pro)', 'woocommerce-product-carousel-slider-and-ultimate' ), value: 'coverflow', disabled: true },
+									{ label: __( 'Flip (Pro)', 'woocommerce-product-carousel-slider-and-ultimate' ), value: 'flip', disabled: true },
+								] }
+								onChange={ newState => setAttributes( { carousel_effect: newState } ) }
+							/> : '' }
+
+							{ ! ( layout == 'carousel' && carousel_effect == 'fade' ) ? <>
 							<TextControl
 								label={ __( 'Products Columns', 'directorist' ) }
 								type='text'
@@ -443,6 +458,7 @@ registerBlockType( 'wcpcsup/block', {
 								value={ c_mobile }
 								onChange={ newState => setAttributes( { c_mobile: newState } ) }
 							/>
+							</> : '' }
 
 							<TextControl
 								label={ __( 'Slide Speed', 'directorist' ) }
@@ -531,6 +547,13 @@ registerBlockType( 'wcpcsup/block', {
 						</PanelBody> : '' }
 
 						<PanelBody title={ __( 'Image', 'woocommerce-product-carousel-slider-and-ultimate' ) } initialOpen={ false }>
+
+							<ToggleControl
+								label={ __( 'Swap Image on Hover', 'woocommerce-product-carousel-slider-and-ultimate' ) }
+								help={ __( 'Shows the first gallery image when the card is hovered.', 'woocommerce-product-carousel-slider-and-ultimate' ) }
+								checked={ img_hover_swap }
+								onChange={ newState => setAttributes( { img_hover_swap: newState } ) }
+							/>
 
 							<ToggleControl
 								label={ __( 'Image Resize & Crop', 'directorist' ) }
